@@ -1,0 +1,23 @@
+fn main(): i32
+{
+    // some comment
+    let x: i32 = 123 - 66;
+    {
+        let xxx: i32 = -5;
+        x = xxx + 1;
+    }
+    let y: i32 = spam(0xabc * x, x);
+    noop();
+    let z: i32 = 0b111110101 / 2;
+    return x + y * z;
+}
+
+fn noop()
+{
+    return;
+}
+
+fn spam(a: i32, b: i32): i32
+{
+    return a + b + 1;
+}
