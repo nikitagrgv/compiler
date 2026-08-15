@@ -1,113 +1,25 @@
 namespace Compiler;
 
-public enum TokenType
-{
-    LPar,
-    RPar,
-    LBrace,
-    RBrace,
-    Comma,
-    Colon,
-    Semicolon,
-
-    Assign,
-    Plus,
-    Minus,
-    Star,
-    Slash,
-
-    KeywordFunc,
-    KeywordReturn,
-    KeywordLet,
-
-    Identifier,
-
-    LiteralInt,
-
-    Eof,
-}
-
-public static class TokenUtils
-{
-    extension(TokenType type)
-    {
-        public string PrettyName()
-        {
-            return type switch
-            {
-                TokenType.LPar => "(",
-                TokenType.RPar => ")",
-                TokenType.LBrace => "{",
-                TokenType.RBrace => "}",
-                TokenType.Comma => ",",
-                TokenType.Colon => ":",
-                TokenType.Semicolon => ";",
-
-                TokenType.Assign => "=",
-                TokenType.Plus => "+",
-                TokenType.Minus => "-",
-                TokenType.Star => "*",
-                TokenType.Slash => "/",
-
-                TokenType.KeywordFunc => "fn",
-                TokenType.KeywordReturn => "return",
-                TokenType.KeywordLet => "let",
-
-                TokenType.Identifier => "$",
-
-                TokenType.LiteralInt => "i",
-
-                TokenType.Eof => "EOF",
-
-                _ => throw new Exception($"Unknown token type: {type}")
-            };
-        }
-
-        public bool IsLiteral
-        {
-            get
-            {
-                return type switch
-                {
-                    TokenType.LiteralInt => true,
-                    _ => false
-                };
-            }
-        }
-    }
-}
-
-public struct Token
-{
-    public TokenType Type;
-    public string Value;
-    public int Line;
-    public int Column;
-
-    public override string ToString()
-    {
-        if (string.IsNullOrEmpty(Value))
-        {
-            return $"{Line}:{Column} {Type}";
-        }
-
-        return $"{Line}:{Column} {Type} \"{Value}\"";
-    }
-}
-
 public class Lexer
 {
+    private readonly string _code;
+
     public struct Result
     {
         public List<Token> Tokens;
         public List<string> Errors;
     }
 
-    public Result Run(string code)
+    public Lexer(string code)
+    {
+        _code = code;
+    }
+
+    public Result Run()
     {
         List<Token> tokens = [];
         List<string> errors = [];
-        int len = code.Length;
+        int len = _code.Length;
         int pos = 0;
         int line = 1;
         int column = 1;
@@ -115,9 +27,9 @@ public class Lexer
 
         while (pos < len)
         {
-            char c = code[pos];
+            char c = _code[pos];
 
-            if (c == '/' && pos + 1 < len && code[pos + 1] == '/')
+            if (c == '/' && pos + 1 < len && _code[pos + 1] == '/')
             {
                 comment = true;
             }
@@ -161,6 +73,8 @@ public class Lexer
                 Token token = new()
                 {
                     Type = singleCharToken,
+                    Position = pos,
+                    Length = 1,
                     Line = line,
                     Column = column,
                 };
@@ -170,29 +84,31 @@ public class Lexer
                 continue;
             }
 
-            if (TryParseLiteralInt(code.AsSpan(pos), out string value, out int valueLen, out bool valid))
+            if (TryParseLiteralInt(_code.AsSpan(pos), out int valueLen, out bool valid))
             {
-                if (!valid)
-                {
-                    errors.Add($"Invalid integer literal ({line}:{column}): {value}");
-                    break;
-                }
-
                 Token token = new()
                 {
                     Type = TokenType.LiteralInt,
-                    Value = value,
+                    Position = pos,
+                    Length = valueLen,
                     Line = line,
                     Column = column,
                 };
+
+                if (!valid)
+                {
+                    errors.Add($"Invalid integer literal ({line}:{column}): {token.Value(_code)}");
+                    break;
+                }
+
                 tokens.Add(token);
                 pos += valueLen;
                 column += valueLen;
                 continue;
             }
 
-            string word = ParseWord(code.AsSpan(pos));
-            if (string.IsNullOrEmpty(word))
+            ReadOnlySpan<char> word = ParseWord(_code.AsSpan(pos));
+            if (word.IsEmpty)
             {
                 errors.Add($"Unexpected token ({line}:{column})");
                 break;
@@ -203,6 +119,8 @@ public class Lexer
                 Token token = new()
                 {
                     Type = keywordType,
+                    Position = pos,
+                    Length = word.Length,
                     Line = line,
                     Column = column,
                 };
@@ -213,7 +131,8 @@ public class Lexer
                 Token token = new()
                 {
                     Type = TokenType.Identifier,
-                    Value = word,
+                    Position = pos,
+                    Length = word.Length,
                     Line = line,
                     Column = column,
                 };
@@ -227,6 +146,8 @@ public class Lexer
         tokens.Add(new Token()
         {
             Type = TokenType.Eof,
+            Position = pos,
+            Length = 0,
             Line = line,
             Column = column
         });
@@ -240,7 +161,7 @@ public class Lexer
         return result;
     }
 
-    private TokenType? TryParseKeyword(string word)
+    private TokenType? TryParseKeyword(ReadOnlySpan<char> word)
     {
         return word switch
         {
@@ -251,7 +172,7 @@ public class Lexer
         };
     }
 
-    private static string ParseWord(ReadOnlySpan<char> str)
+    private static ReadOnlySpan<char> ParseWord(ReadOnlySpan<char> str)
     {
         if (!IsWordStart(str[0]))
         {
@@ -264,12 +185,12 @@ public class Lexer
             pos++;
         }
 
-        return str[..pos].ToString();
+        ReadOnlySpan<char> word = str[..pos];
+        return word;
     }
 
-    private static bool TryParseLiteralInt(ReadOnlySpan<char> str, out string value, out int len, out bool valid)
+    private static bool TryParseLiteralInt(ReadOnlySpan<char> str, out int len, out bool valid)
     {
-        value = "";
         len = 0;
         valid = true;
 
@@ -321,7 +242,6 @@ public class Lexer
         }
 
         len = pos;
-        value = str[..len].ToString();
 
         if (hexOrBinary && len <= 2)
         {
@@ -351,6 +271,7 @@ public class Lexer
             '-' => TokenType.Minus,
             '*' => TokenType.Star,
             '/' => TokenType.Slash,
+            '%' => TokenType.Percent,
             ',' => TokenType.Comma,
             _ => null
         };

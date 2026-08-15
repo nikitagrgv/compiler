@@ -1,6 +1,6 @@
 ﻿namespace Compiler;
 
-class Program
+class App
 {
     struct Arguments
     {
@@ -13,6 +13,9 @@ class Program
         [Argument("lexer-pretty")]
         public bool DebugLexerPretty { get; set; }
 
+        [Argument("parser")]
+        public bool DebugParser { get; set; }
+
         [PositionalArgsList]
         public List<string> Files { get; set; }
     }
@@ -22,7 +25,8 @@ class Program
         Compiler.Flags flags = new()
         {
             DebugLexer = arguments.DebugLexer,
-            DebugLexerPretty = arguments.DebugLexerPretty
+            DebugLexerPretty = arguments.DebugLexerPretty,
+            DebugParser = arguments.DebugParser
         };
         return flags;
     }

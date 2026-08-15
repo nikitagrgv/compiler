@@ -6,10 +6,14 @@ public class Compiler
     {
         public bool DebugLexer = false;
         public bool DebugLexerPretty = false;
+        public bool DebugParser = false;
     }
 
-    private IFileSystem _fs;
-    private Flags _flags;
+    private readonly IFileSystem _fs;
+    private readonly Flags _flags;
+
+    private string _code = "";
+    private List<Token> _tokens = [];
 
     public Compiler(IFileSystem fs, Flags flags)
     {
@@ -21,14 +25,17 @@ public class Compiler
     {
         string fullPathFile = _fs.ResolveToFullPath(file);
         string fullPathOutput = _fs.ResolveToFullPath(output ?? "output.o");
-        string code = _fs.ReadAll(fullPathFile);
-        return Compile(code);
+
+        Console.WriteLine($"Compiling {fullPathFile} to {fullPathOutput}");
+
+        _code = _fs.ReadAll(fullPathFile);
+        return Compile();
     }
 
-    private bool Compile(string code)
+    private bool Compile()
     {
-        Lexer lexer = new();
-        Lexer.Result lexerResult = lexer.Run(code);
+        Lexer lexer = new(_code);
+        Lexer.Result lexerResult = lexer.Run();
         if (lexerResult.Errors.Count > 0)
         {
             Console.WriteLine("Lexer errors:");
@@ -40,36 +47,57 @@ public class Compiler
             return false;
         }
 
+        _tokens = lexerResult.Tokens;
+
         if (_flags.DebugLexer)
         {
             Console.WriteLine("================================");
-            PrintTokens(lexerResult.Tokens);
+            PrintTokens();
             Console.WriteLine("================================");
         }
 
         if (_flags.DebugLexerPretty)
         {
             Console.WriteLine("================================");
-            PrintTokensPretty(lexerResult.Tokens);
+            PrintTokensPretty();
+            Console.WriteLine("================================");
+        }
+
+        Parser parser = new(_code, _tokens);
+        CompilationUnit unit;
+        try
+        {
+            unit = parser.Run();
+        }
+        catch (ParseException e)
+        {
+            Console.WriteLine($"Parse Exception: {e.Message}");
+            return false;
+        }
+
+        if (_flags.DebugParser)
+        {
+            Console.WriteLine("================================");
+            PrintAst(unit);
             Console.WriteLine("================================");
         }
 
         return true;
     }
 
-    private void PrintTokens(List<Token> tokens)
+    private void PrintTokens()
     {
-        foreach (Token token in tokens)
+        foreach (Token token in _tokens)
         {
-            Console.WriteLine(token);
+            Console.WriteLine(token.ToString(_code));
         }
     }
 
-    private void PrintTokensPretty(List<Token> tokens)
+    private void PrintTokensPretty()
     {
         int curLine = 0;
         int curColumn = 1;
-        foreach (Token token in tokens)
+        foreach (Token token in _tokens)
         {
             while (curLine < token.Line)
             {
@@ -92,9 +120,10 @@ public class Compiler
             }
 
             string str = token.Type.PrettyName();
-            if (token.Value != null)
+
+            if (token.Type.IsLiteral || token.Type == TokenType.Identifier)
             {
-                str += $"\"{token.Value}\"";
+                str += token.Value(_code).ToString();
             }
 
             Console.Write(str);
@@ -102,5 +131,176 @@ public class Compiler
         }
 
         Console.WriteLine();
+    }
+
+    private void PrintAst(CompilationUnit unit)
+    {
+        PrintAst(0, unit);
+    }
+
+    private string MakeIndent(int depth)
+    {
+        string indent = "";
+        for (int i = 0; i < depth; i++)
+        {
+            indent += " |   ";
+        }
+
+        return indent;
+    }
+
+    private void PrintAst(int depth, Node node, string prefix = "")
+    {
+        string fullPrefix = MakeIndent(depth);
+        if (prefix != "")
+        {
+            fullPrefix += prefix + ": ";
+        }
+
+        switch (node)
+        {
+            case CompilationUnit n:
+                Console.WriteLine($"{fullPrefix}CompilationUnit");
+                n.FuncDecls.ForEach(fd => PrintAst(depth + 1, fd));
+                break;
+            case Block n:
+                Console.WriteLine($"{fullPrefix}Block");
+                n.Stmts.ForEach(stmt => PrintAst(depth + 1, stmt));
+                break;
+            case Param n:
+                Console.WriteLine($"{fullPrefix}Param");
+                PrintAstToken(depth + 1, n.NameToken, "Name");
+                PrintAst(depth + 1, n.Type);
+                break;
+            case TypeDecl n:
+                Console.WriteLine($"{fullPrefix}TypeDecl");
+                PrintAstToken(depth + 1, n.TypeNameToken, "Type");
+                break;
+            case FuncDecl n:
+                Console.WriteLine($"{fullPrefix}FuncDecl");
+                PrintAstToken(depth + 1, n.NameToken, "Name");
+                n.Params.ForEach(p => PrintAst(depth + 1, p));
+                if (n.ReturnType != null)
+                {
+                    PrintAst(depth + 1, n.ReturnType);
+                }
+
+                PrintAst(depth + 1, n.Body);
+                break;
+            case StmtLet n:
+                Console.WriteLine($"{fullPrefix}StmtLet");
+                PrintAstToken(depth + 1, n.NameToken, "Name");
+                if (n.Type != null)
+                {
+                    PrintAst(depth + 1, n.Type);
+                }
+
+                if (n.Expr != null)
+                {
+                    PrintAst(depth + 1, n.Expr);
+                }
+
+                break;
+            case StmtReturn n:
+                if (n.Expr == null)
+                {
+                    Console.WriteLine($"{fullPrefix}StmtReturn");
+                    break;
+                }
+
+                Console.WriteLine($"{fullPrefix}StmtReturn: {PrettyExpr(n.Expr)}");
+                PrintAst(depth + 1, n.Expr);
+
+                break;
+
+            case StmtAssign n:
+                Console.WriteLine(
+                    $"{fullPrefix}StmtAssign: {PrettyExpr(n.Target)} = {PrettyExpr(n.Value)}");
+                PrintAst(depth + 1, n.Target);
+                PrintAst(depth + 1, n.Value);
+                break;
+            case StmtExpr n:
+                Console.WriteLine($"{fullPrefix}StmtExpr: {PrettyExpr(n.Expr)}");
+                PrintAst(depth + 1, n.Expr);
+                break;
+
+            case ExprBinary n:
+                Console.WriteLine($"{fullPrefix}BinaryExpr: {PrettyExpr(n)}");
+                PrintAstToken(depth + 1, n.OperatorToken, "Operator");
+                PrintAst(depth + 1, n.Left, "Left");
+                PrintAst(depth + 1, n.Right, "Right");
+                break;
+            case ExprUnary n:
+                Console.WriteLine($"{fullPrefix}UnaryExpr: {PrettyExpr(n)}");
+                PrintAstToken(depth + 1, n.OperatorToken, "Operator");
+                PrintAst(depth + 1, n.Expr);
+                break;
+            case ExprCall n:
+                Console.WriteLine($"{fullPrefix}Call: {PrettyExpr(n)}");
+                n.Args.ForEach(arg => PrintAst(depth + 1, arg));
+                break;
+            case ExprInt n:
+                Console.WriteLine($"{fullPrefix}ExprInt: {TokenValue(n.LiteralToken)}");
+                break;
+            case ExprIdentifier n:
+                Console.WriteLine($"{fullPrefix}ExprIdentifier: {TokenValue(n.IdentifierToken)}");
+                break;
+            default: throw new Exception("Unknown node type: " + node.GetType().Name);
+        }
+    }
+
+    private string TokenValue(int tokenIndex)
+    {
+        return _tokens[tokenIndex].Value(_code).ToString();
+    }
+
+    private string PrettyExpr(Expr expr)
+    {
+        string ret = "(";
+        switch (expr)
+        {
+            case ExprBinary binaryExpr:
+                ret += PrettyExpr(binaryExpr.Left);
+                ret += " ";
+                ret += TokenValue(binaryExpr.OperatorToken);
+                ret += " ";
+                ret += PrettyExpr(binaryExpr.Right);
+                break;
+            case ExprUnary unaryExpr:
+                ret += TokenValue(unaryExpr.OperatorToken);
+                ret += PrettyExpr(unaryExpr.Expr);
+                break;
+            case ExprCall exprCall:
+                ret = "";
+                ret += TokenValue(exprCall.IdentifierToken);
+                ret += "(";
+                for (int i = 0; i < exprCall.Args.Count; ++i)
+                {
+                    if (i != 0)
+                    {
+                        ret += ", ";
+                    }
+
+                    ret += PrettyExpr(exprCall.Args[i]);
+                }
+
+                ret += ")";
+
+                return ret;
+            case ExprInt exprInt:
+                return TokenValue(exprInt.LiteralToken);
+            case ExprIdentifier exprIdentifier:
+                return TokenValue(exprIdentifier.IdentifierToken);
+            default: throw new Exception("Unknown node type: " + expr.GetType().Name);
+        }
+
+        ret += ")";
+        return ret;
+    }
+
+    private void PrintAstToken(int depth, int token, string name)
+    {
+        string indent = MakeIndent(depth);
+        Console.WriteLine($"{indent}{name}: \"{_tokens[token].Value(_code)}\"");
     }
 }

@@ -1,13 +1,15 @@
 fn main(): i32
 {
     // some comment
-    let x: i32 = 123 - 66;
+    let x: i32 = -1 - (-2 + 3) * -4 * 5 - 6 * -(-7);
     {
         let xxx: i32 = -5;
         x = xxx + 1;
     }
-    let y: i32 = spam(0xabc * x, x);
+    let y = spam(0xabc * x, x);
+    x = spam(5 + 1 * spam(-2 + 3) * -4, -4 + y);
     noop();
+    noop() = noop();
     let z: i32 = 0b111110101 / 2;
     return x + y * z;
 }
