@@ -102,11 +102,11 @@ public class Parser
         {
             if (Check(type))
             {
-                ++_cursor;
+                Advance();
                 return true;
             }
 
-            ++_cursor;
+            Advance();
         }
 
         return false;
@@ -128,7 +128,7 @@ public class Parser
                 return true;
             }
 
-            ++_cursor;
+            Advance();
         }
 
         return false;
