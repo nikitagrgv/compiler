@@ -60,21 +60,6 @@ public class Diagnostic
         HasErrors = true;
     }
 
-    public void AddError(string message, in Token token)
-    {
-        DiagnosticEntry entry = new()
-        {
-            Severity = DiagnosticSeverity.Error,
-            Message = message,
-            Position = token.Position,
-            Length = token.Length,
-            Line = token.Line,
-            Column = token.Column,
-        };
-        _entries.Add(entry);
-        HasErrors = true;
-    }
-
     public void Report()
     {
         foreach (DiagnosticEntry entry in _entries)

@@ -2,14 +2,14 @@ namespace Compiler;
 
 public class Parser
 {
-    private string? _code;
+    private string _code = "";
     private Diagnostic? _diag;
     private bool _hasErrors = false;
     private List<Token> _tokens = [];
     private int _cursor;
 
-    private class UnexpectedTokenException(string message, Token given, TokenType? expected)
-        : Exception(message)
+    private class UnexpectedTokenException(Token given, TokenType? expected)
+        : Exception($"Unexpected token: {given.Type}")
     {
         public Token GivenToken { get; init; } = given;
         public TokenType? Expected { get; init; } = expected;
@@ -80,7 +80,7 @@ public class Parser
         if (!Check(type))
         {
             Token given = _tokens[_cursor];
-            throw new UnexpectedTokenException("Unexpected token", given, type);
+            throw new UnexpectedTokenException(given, type);
         }
 
         Advance();
@@ -191,8 +191,20 @@ public class Parser
 
         while (!Check(TokenType.RBrace) && !IsAtEnd())
         {
-            Stmt stmt = ParseStmt();
-            stmts.Add(stmt);
+            try
+            {
+                Stmt stmt = ParseStmt();
+                stmts.Add(stmt);
+            }
+            catch (UnexpectedTokenException e)
+            {
+                string message = UnexpectedTokenMessage(e.GivenToken, e.Expected);
+                _diag?.AddError(message,
+                    e.GivenToken.Position,
+                    e.GivenToken.Length,
+                    e.GivenToken.Line,
+                    e.GivenToken.Column);
+            }
         }
 
         Expect(TokenType.RBrace);
@@ -428,7 +440,7 @@ public class Parser
         }
 
         Token token = _tokens[_cursor];
-        throw new UnexpectedTokenException("Unexpected token", token, null);
+        throw new UnexpectedTokenException(token, null);
     }
 
     private Expr ParseIdentifier()
@@ -471,5 +483,22 @@ public class Parser
             IdentifierToken = identifierToken,
             Args = args
         };
+    }
+
+    private string UnexpectedTokenMessage(Token given, TokenType? expected = null)
+    {
+        string value = given.Value(_code).ToString();
+        if (value.Length <= 0)
+        {
+            value = given.Type.PrettyName();
+        }
+
+        string str = $"Unexpected token: {value}";
+        if (expected != null)
+        {
+            str += ". Expected " + expected.Value.PrettyName();
+        }
+
+        return str;
     }
 }
