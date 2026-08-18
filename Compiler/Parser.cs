@@ -87,6 +87,21 @@ public class Parser
         return pos;
     }
 
+    private bool SkipToNext(TokenType type)
+    {
+        while (!IsAtEnd())
+        {
+            if (Check(type))
+            {
+                return true;
+            }
+
+            ++_cursor;
+        }
+
+        return false;
+    }
+
     private int End(int begin)
     {
         return Math.Max(begin, _cursor - 1);
@@ -191,6 +206,7 @@ public class Parser
 
         while (!Check(TokenType.RBrace) && !IsAtEnd())
         {
+            int cursorBefore = _cursor;
             try
             {
                 Stmt stmt = ParseStmt();
@@ -199,6 +215,12 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
+                if (_cursor <= cursorBefore)
+                {
+                    Advance();
+                }
+
+                SkipToNext(TokenType.RBrace);
             }
         }
 
