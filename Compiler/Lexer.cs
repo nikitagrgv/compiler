@@ -199,7 +199,6 @@ public class Lexer
             valid = false;
             while (pos < str.Length && !IsWordPart(str[pos]))
             {
-                valid = false;
                 ++pos;
             }
 

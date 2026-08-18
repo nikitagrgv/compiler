@@ -358,6 +358,7 @@ public class LexerTest
     [Theory]
     [InlineData("#abc", 1)]
     [InlineData("$abc", 1)]
+    [InlineData("$#$abc", 3)]
     public void Lexer_ReportsErrorForUnexpectedSymbols(string str, int expectedLen)
     {
         Diagnostic diag = new();
