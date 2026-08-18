@@ -396,6 +396,29 @@ public class LexerTest
     }
 
     [Theory]
+    [InlineData("ab#cd", TokenType.Identifier, TokenType.Identifier)]
+    [InlineData("ab#12", TokenType.Identifier, TokenType.LiteralInt)]
+    [InlineData("12#ab", TokenType.LiteralInt, TokenType.Identifier)]
+    [InlineData("12#12", TokenType.LiteralInt, TokenType.LiteralInt)]
+    public void Lexer_UnexpectedSymbolSplitsCode(string str, TokenType left, TokenType right)
+    {
+        Diagnostic diag = new();
+        Lexer lexer = new();
+        Lexer.Result result = lexer.Run(str, diag);
+
+        Assert.True(result.HasErrors);
+        Assert.True(diag.HasErrors);
+        Assert.Single(diag.Entries);
+
+        Assert.Equal(4, result.Tokens.Count);
+
+        Assert.Equal(left, result.Tokens[0].Type);
+        Assert.Equal(TokenType.Invalid, result.Tokens[1].Type);
+        Assert.Equal(right, result.Tokens[2].Type);
+        Assert.Equal(TokenType.Eof, result.Tokens[3].Type);
+    }
+
+    [Theory]
     [InlineData(" ")]
     [InlineData("   ")]
     [InlineData("\n")]
