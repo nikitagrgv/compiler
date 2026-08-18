@@ -89,9 +89,15 @@ public class Parser
         return pos;
     }
 
-    private bool SkipUntilAfter(TokenType type)
+    private bool RecoveryAfter(int prevPos, TokenType type)
     {
         Debug.Assert(type != TokenType.Eof);
+
+        if (_cursor <= prevPos)
+        {
+            Advance();
+        }
+
         while (!IsAtEnd())
         {
             if (Check(type))
@@ -219,12 +225,7 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
-                if (_cursor <= cursorBefore)
-                {
-                    Advance();
-                }
-
-                SkipUntilAfter(TokenType.Semicolon);
+                RecoveryAfter(TokenType.Semicolon);
             }
         }
 
