@@ -198,12 +198,7 @@ public class Parser
             }
             catch (UnexpectedTokenException e)
             {
-                string message = UnexpectedTokenMessage(e.GivenToken, e.Expected);
-                _diag?.AddError(message,
-                    e.GivenToken.Position,
-                    e.GivenToken.Length,
-                    e.GivenToken.Line,
-                    e.GivenToken.Column);
+                ReportError(e);
             }
         }
 
@@ -483,6 +478,16 @@ public class Parser
             IdentifierToken = identifierToken,
             Args = args
         };
+    }
+
+    private void ReportError(UnexpectedTokenException e)
+    {
+        string message = UnexpectedTokenMessage(e.GivenToken, e.Expected);
+        _diag?.AddError(message,
+            e.GivenToken.Position,
+            e.GivenToken.Length,
+            e.GivenToken.Line,
+            e.GivenToken.Column);
     }
 
     private string UnexpectedTokenMessage(Token given, TokenType? expected = null)
