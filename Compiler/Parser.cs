@@ -6,22 +6,33 @@ public class ParseException(string message) : Exception(message)
 
 public class Parser
 {
-    private readonly string _code;
-    private readonly List<Token> _tokens;
+    private string? _code;
+    private Diagnostic? _diag;
+    private bool _hasErrors = false;
+    private List<Token> _tokens = [];
     private int _cursor;
 
-    public Parser(string code, List<Token> tokens)
+    public struct Result
     {
-        _code = code;
-        _tokens = tokens;
-        _cursor = 0;
+        public CompilationUnit CompilationUnit;
+        public bool HasErrors;
     }
 
-    public CompilationUnit Run()
+    public Result Run(string code, List<Token> tokens, Diagnostic diag)
     {
+        _code = code;
+        _diag = diag;
+        _tokens = tokens;
+        _hasErrors = false;
         _cursor = 0;
+
         CompilationUnit compilationUnit = ParseCompilationUnit();
-        return compilationUnit;
+        Result result = new()
+        {
+            CompilationUnit = compilationUnit,
+            HasErrors = _hasErrors,
+        };
+        return result;
     }
 
     private Token Peek(int n = 0)
