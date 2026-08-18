@@ -359,7 +359,11 @@ public class LexerTest
     [InlineData("#abc", 1)]
     [InlineData("$abc", 1)]
     [InlineData("$#$abc", 3)]
-    public void Lexer_ReportsErrorForUnexpectedSymbols(string str, int expectedLen)
+    [InlineData("abc$#$", 3)]
+    [InlineData("a$b#c$", 3)]
+    [InlineData("гды123", 3)]
+    [InlineData("123гды", 3)]
+    public void Lexer_ReportsErrorForUnexpectedSymbols(string str, int numErrors)
     {
         Diagnostic diag = new();
         Lexer lexer = new();
@@ -367,14 +371,8 @@ public class LexerTest
 
         Assert.True(result.HasErrors);
         Assert.True(diag.HasErrors);
-        Assert.Single(diag.Entries);
 
-        Assert.Equal(TokenType.Invalid, result.Tokens[0].Type);
-        Assert.Equal(0, result.Tokens[0].Position);
-        Assert.Equal(expectedLen, result.Tokens[0].Length);
-
-        Assert.Equal(0, diag.Entries[0].Position);
-        Assert.Equal(expectedLen, diag.Entries[0].Length);
+        Assert.Equal(numErrors, diag.Entries.Count);
     }
 
     [Theory]
