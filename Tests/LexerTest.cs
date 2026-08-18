@@ -363,7 +363,7 @@ public class LexerTest
     [InlineData("a$b#c$", 3)]
     [InlineData("гды123", 3)]
     [InlineData("123гды", 3)]
-    public void Lexer_ReportsErrorForUnexpectedSymbols(string str, int numErrors)
+    public void Lexer_ReportsErrorForEachUnexpectedSymbols(string str, int numErrors)
     {
         Diagnostic diag = new();
         Lexer lexer = new();
