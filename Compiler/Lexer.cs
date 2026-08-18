@@ -125,8 +125,8 @@ public class Lexer
                     Column = column,
                 };
                 tokens.Add(invalidToken);
-                pos++;
-                column++;
+                pos += wordLen;
+                column += wordLen;
                 _hasErrors = true;
                 _diag.AddError("Invalid token", invalidToken);
                 continue;
