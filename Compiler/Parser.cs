@@ -112,6 +112,28 @@ public class Parser
         return false;
     }
 
+    private bool RecoveryOn(int prevCursor, TokenType type)
+    {
+        Debug.Assert(type != TokenType.Eof);
+
+        if (_cursor <= prevCursor)
+        {
+            Advance();
+        }
+
+        while (!IsAtEnd())
+        {
+            if (Check(type))
+            {
+                return true;
+            }
+
+            ++_cursor;
+        }
+
+        return false;
+    }
+
     private int End(int begin)
     {
         return Math.Max(begin, _cursor - 1);
