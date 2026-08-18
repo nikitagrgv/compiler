@@ -146,8 +146,17 @@ public class Parser
         List<FuncDecl> funcDecls = [];
         while (!IsAtEnd())
         {
-            FuncDecl decl = ParseFuncDecl();
-            funcDecls.Add(decl);
+            int prevCursor = _cursor;
+            try
+            {
+                FuncDecl decl = ParseFuncDecl();
+                funcDecls.Add(decl);
+            }
+            catch (UnexpectedTokenException e)
+            {
+                ReportError(e);
+                RecoveryOn(prevCursor, TokenType.KeywordFunc);
+            }
         }
 
         int end = End(begin);
