@@ -1,9 +1,5 @@
 namespace Compiler;
 
-public class ParseException(string message) : Exception(message)
-{
-}
-
 public class Parser
 {
     private string? _code;
@@ -11,6 +7,13 @@ public class Parser
     private bool _hasErrors = false;
     private List<Token> _tokens = [];
     private int _cursor;
+
+    private class UnexpectedTokenException(string message, Token given, TokenType? expected)
+        : Exception(message)
+    {
+        public Token GivenToken { get; init; } = given;
+        public TokenType? Expected { get; init; } = expected;
+    }
 
     public struct Result
     {
@@ -76,7 +79,8 @@ public class Parser
         int pos = _cursor;
         if (!Check(type))
         {
-            throw new ParseException(UnexpectedTokenMessage(expected: type));
+            Token given = _tokens[_cursor];
+            throw new UnexpectedTokenException("Unexpected token", given, type);
         }
 
         Advance();
@@ -423,7 +427,8 @@ public class Parser
             return ParseIdentifier();
         }
 
-        throw new ParseException(UnexpectedTokenMessage());
+        Token token = _tokens[_cursor];
+        throw new UnexpectedTokenException("Unexpected token", token, null);
     }
 
     private Expr ParseIdentifier()
@@ -466,23 +471,5 @@ public class Parser
             IdentifierToken = identifierToken,
             Args = args
         };
-    }
-
-    private string UnexpectedTokenMessage(TokenType? expected = null)
-    {
-        Token token = _tokens[_cursor];
-        string value = token.Value(_code).ToString();
-        if (value.Length <= 0)
-        {
-            value = token.Type.PrettyName();
-        }
-
-        string str = $"Unexpected token at {token.Line}:{token.Column}: {value}";
-        if (expected != null)
-        {
-            str += ". Expected " + expected.Value.PrettyName();
-        }
-
-        return str;
     }
 }
