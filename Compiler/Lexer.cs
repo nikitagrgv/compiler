@@ -193,20 +193,14 @@ public class Lexer
 
     private static void ParseWord(ReadOnlySpan<char> str, out int len, out bool valid)
     {
-        int pos = 0;
         if (!IsWordStart(str[0]))
         {
             valid = false;
-            while (pos < str.Length && !IsWordPart(str[pos]))
-            {
-                ++pos;
-            }
-
-            len = pos;
+            len = 1;
             return;
         }
 
-        ++pos;
+        int pos = 1;
         while (pos < str.Length && IsWordPart(str[pos]))
         {
             pos++;
