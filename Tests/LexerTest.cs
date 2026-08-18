@@ -376,6 +376,26 @@ public class LexerTest
     }
 
     [Theory]
+    [InlineData("#abc", 0)]
+    [InlineData("a#bc", 1)]
+    [InlineData("ab#c", 2)]
+    [InlineData("abc#", 3)]
+    public void Lexer_ReportsPositionOfUnexpectedSymbolsCorrectly(string str, int pos)
+    {
+        Diagnostic diag = new();
+        Lexer lexer = new();
+        Lexer.Result result = lexer.Run(str, diag);
+
+        Assert.True(result.HasErrors);
+        Assert.True(diag.HasErrors);
+
+        Assert.Single(diag.Entries);
+
+        Assert.Equal(pos, diag.Entries[0].Position);
+        Assert.Equal(1, diag.Entries[0].Length);
+    }
+
+    [Theory]
     [InlineData(" ")]
     [InlineData("   ")]
     [InlineData("\n")]
