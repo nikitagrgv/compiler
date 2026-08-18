@@ -89,9 +89,9 @@ public class Parser
         return pos;
     }
 
-    private bool RecoveryAfter(int prevCursor, TokenType type)
+    private bool RecoveryAfter(int prevCursor, params TokenType[] types)
     {
-        Debug.Assert(type != TokenType.Eof);
+        Debug.Assert(types.Length > 0);
 
         if (_cursor <= prevCursor)
         {
@@ -100,7 +100,7 @@ public class Parser
 
         while (!IsAtEnd())
         {
-            if (Check(type))
+            if (types.Contains(Peek().Type))
             {
                 Advance();
                 return true;
