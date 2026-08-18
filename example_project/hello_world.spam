@@ -8,6 +8,7 @@ fn main(): i32
     }
     let y = spam(0xabc * x, x);
     x = spam(5 + 1 * spam(-2 + 3) * -4, -4 + y);
+    spam(5 + 1 * spam(-2 + 3) * -4, -4 + y);
     noop();
     noop() = noop();
     let z: i32 = 0b111110101 / 2;

@@ -211,24 +211,6 @@ public class Parser
         return ParseAssignOrStmtExpr();
     }
 
-    private string UnexpectedTokenMessage(TokenType? expected = null)
-    {
-        Token token = _tokens[_cursor];
-        string value = token.Value(_code).ToString();
-        if (value.Length <= 0)
-        {
-            value = token.Type.PrettyName();
-        }
-
-        string str = $"Unexpected token at {token.Line}:{token.Column}: {value}";
-        if (expected != null)
-        {
-            str += ". Expected " + expected.Value.PrettyName();
-        }
-
-        return str;
-    }
-
     private StmtLet ParseLet()
     {
         int begin = _cursor;
@@ -327,6 +309,7 @@ public class Parser
         return stmt;
     }
 
+    // TODO: Use precedence parsing
     private Expr ParseExpr()
     {
         int begin = _cursor;
@@ -472,5 +455,23 @@ public class Parser
             IdentifierToken = identifierToken,
             Args = args
         };
+    }
+
+    private string UnexpectedTokenMessage(TokenType? expected = null)
+    {
+        Token token = _tokens[_cursor];
+        string value = token.Value(_code).ToString();
+        if (value.Length <= 0)
+        {
+            value = token.Type.PrettyName();
+        }
+
+        string str = $"Unexpected token at {token.Line}:{token.Column}: {value}";
+        if (expected != null)
+        {
+            str += ". Expected " + expected.Value.PrettyName();
+        }
+
+        return str;
     }
 }

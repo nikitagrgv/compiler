@@ -2,34 +2,35 @@ namespace Compiler;
 
 public class Lexer
 {
-    private readonly string _code;
+    private string? _code;
+    private Diagnostic? _diag;
+    private bool _hasErrors = false;
 
     public struct Result
     {
         public List<Token> Tokens;
-        public List<string> Errors;
+        public bool HasErrors;
     }
 
-    public Lexer(string code)
+    // TODO: Make it lazy? NextToken()
+    public Result Run(string code, Diagnostic diag)
     {
         _code = code;
-    }
+        _diag = diag;
+        _hasErrors = false;
 
-    public Result Run()
-    {
         List<Token> tokens = [];
-        List<string> errors = [];
-        int len = _code.Length;
+        int codeLen = _code.Length;
         int pos = 0;
         int line = 1;
         int column = 1;
         bool comment = false;
 
-        while (pos < len)
+        while (pos < codeLen)
         {
             char c = _code[pos];
 
-            if (c == '/' && pos + 1 < len && _code[pos + 1] == '/')
+            if (c == '/' && pos + 1 < codeLen && _code[pos + 1] == '/')
             {
                 comment = true;
             }
@@ -57,8 +58,12 @@ public class Lexer
 
             if (c == '\t')
             {
-                errors.Add($"Unexpected tab character ({line}:{column})");
-                break;
+                // Emit error, but don't add invalid token
+                _diag.AddError("Tab characters are forbidden", pos, 1, line, column);
+                pos++;
+                column++;
+                _hasErrors = true;
+                continue;
             }
 
             if (char.IsWhiteSpace(c))
@@ -97,8 +102,9 @@ public class Lexer
 
                 if (!valid)
                 {
-                    errors.Add($"Invalid integer literal ({line}:{column}): {token.Value(_code)}");
-                    break;
+                    token.Type = TokenType.Invalid;
+                    _hasErrors = true;
+                    _diag.AddError("Invalid integer literal", token);
                 }
 
                 tokens.Add(token);
@@ -107,13 +113,26 @@ public class Lexer
                 continue;
             }
 
-            ReadOnlySpan<char> word = ParseWord(_code.AsSpan(pos));
-            if (word.IsEmpty)
+            ParseWord(_code.AsSpan(pos), out int wordLen, out valid);
+            if (!valid)
             {
-                errors.Add($"Unexpected token ({line}:{column})");
-                break;
+                Token invalidToken = new()
+                {
+                    Type = TokenType.Invalid,
+                    Position = pos,
+                    Length = wordLen,
+                    Line = line,
+                    Column = column,
+                };
+                tokens.Add(invalidToken);
+                pos++;
+                column++;
+                _hasErrors = true;
+                _diag.AddError("Invalid token", invalidToken);
+                continue;
             }
 
+            ReadOnlySpan<char> word = _code.AsSpan(pos, wordLen);
             if (TryParseKeyword(word) is { } keywordType)
             {
                 Token token = new()
@@ -155,7 +174,7 @@ public class Lexer
         Result result = new()
         {
             Tokens = tokens,
-            Errors = errors
+            HasErrors = _hasErrors,
         };
 
         return result;
@@ -172,11 +191,14 @@ public class Lexer
         };
     }
 
-    private static ReadOnlySpan<char> ParseWord(ReadOnlySpan<char> str)
+    private static void ParseWord(ReadOnlySpan<char> str, out int len, out bool valid)
     {
         if (!IsWordStart(str[0]))
         {
-            return "";
+            valid = false;
+
+            len = 0;
+            return;
         }
 
         int pos = 1;
@@ -185,8 +207,8 @@ public class Lexer
             pos++;
         }
 
-        ReadOnlySpan<char> word = str[..pos];
-        return word;
+        len = pos;
+        valid = true;
     }
 
     private static bool TryParseLiteralInt(ReadOnlySpan<char> str, out int len, out bool valid)

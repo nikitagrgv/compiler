@@ -19,12 +19,7 @@ public class FileSystem : IFileSystem
         return Path.GetFullPath(anyPath, _currentDirectory);
     }
 
-    public Stream OpenRead(string fullPath)
-    {
-        return File.OpenRead(fullPath);
-    }
-
-    public string ReadAll(string fullPath)
+    public string ReadAllText(string fullPath)
     {
         return File.ReadAllText(fullPath);
     }

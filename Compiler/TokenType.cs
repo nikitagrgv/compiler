@@ -2,6 +2,8 @@ namespace Compiler;
 
 public enum TokenType
 {
+    Invalid,
+
     LPar,
     RPar,
     LBrace,
@@ -36,6 +38,8 @@ public static class TokenTypeUtils
         {
             return type switch
             {
+                TokenType.Invalid => "INVALID",
+
                 TokenType.LPar => "(",
                 TokenType.RPar => ")",
                 TokenType.LBrace => "{",

@@ -12,6 +12,7 @@ public class Compiler
     private readonly IFileSystem _fs;
     private readonly Flags _flags;
 
+    private readonly Diagnostic _diag = new();
     private string _code = "";
     private List<Token> _tokens = [];
 
@@ -28,23 +29,19 @@ public class Compiler
 
         Console.WriteLine($"Compiling {fullPathFile} to {fullPathOutput}");
 
-        _code = _fs.ReadAll(fullPathFile);
-        return Compile();
+        string code = _fs.ReadAllText(fullPathFile);
+        return Compile(code);
     }
 
-    private bool Compile()
+    private bool Compile(string code)
     {
-        Lexer lexer = new(_code);
-        Lexer.Result lexerResult = lexer.Run();
-        if (lexerResult.Errors.Count > 0)
+        _code = code;
+        _diag.Clear();
+        Lexer lexer = new();
+        Lexer.Result lexerResult = lexer.Run(_code, _diag);
+        if (lexerResult.HasErrors)
         {
-            Console.WriteLine("Lexer errors:");
-            foreach (string error in lexerResult.Errors)
-            {
-                Console.WriteLine(error);
-            }
-
-            return false;
+            Console.WriteLine("Lexer had errors");
         }
 
         _tokens = lexerResult.Tokens;
@@ -82,7 +79,8 @@ public class Compiler
             Console.WriteLine("================================");
         }
 
-        return true;
+        _diag.Report();
+        return !_diag.HasErrors;
     }
 
     private void PrintTokens()

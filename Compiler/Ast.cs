@@ -2,32 +2,32 @@ namespace Compiler;
 
 public abstract class Node
 {
-    public required int StartToken;
-    public required int EndToken; // inclusive
+    public required int StartToken { get; init; }
+    public required int EndToken { get; init; } // inclusive
 }
 
 public class CompilationUnit : Node
 {
-    public required List<FuncDecl> FuncDecls;
+    public required List<FuncDecl> FuncDecls { get; init; }
 }
 
 public class FuncDecl : Node
 {
-    public required int NameToken;
-    public required List<Param> Params;
-    public required TypeDecl? ReturnType;
-    public required Block Body;
+    public required int NameToken { get; init; }
+    public required List<Param> Params { get; init; }
+    public required TypeDecl? ReturnType { get; init; }
+    public required Block Body { get; init; }
 }
 
 public class Param : Node
 {
-    public required int NameToken;
-    public required TypeDecl Type;
+    public required int NameToken { get; init; }
+    public required TypeDecl Type { get; init; }
 }
 
 public class TypeDecl : Node
 {
-    public required int TypeNameToken;
+    public required int TypeNameToken { get; init; }
 }
 
 public abstract class Stmt : Node
@@ -36,31 +36,31 @@ public abstract class Stmt : Node
 
 public class Block : Stmt
 {
-    public required List<Stmt> Stmts;
+    public required List<Stmt> Stmts { get; init; }
 }
 
 public class StmtLet : Stmt
 {
-    public required int NameToken;
-    public required TypeDecl? Type;
-    public required Expr? Expr;
+    public required int NameToken { get; init; }
+    public required TypeDecl? Type { get; init; }
+    public required Expr? Expr { get; init; }
 }
 
 public class StmtReturn : Stmt
 {
-    public required Expr? Expr;
+    public required Expr? Expr { get; init; }
 }
 
 public class StmtAssign : Stmt
 {
-    public required int AssignToken;
-    public required Expr Target;
-    public required Expr Value;
+    public required int AssignToken { get; init; }
+    public required Expr Target { get; init; }
+    public required Expr Value { get; init; }
 }
 
 public class StmtExpr : Stmt
 {
-    public required Expr Expr;
+    public required Expr Expr { get; init; }
 }
 
 public abstract class Expr : Node
@@ -69,15 +69,15 @@ public abstract class Expr : Node
 
 public class ExprBinary : Expr
 {
-    public required int OperatorToken;
-    public required Expr Left;
-    public required Expr Right;
+    public required int OperatorToken { get; init; }
+    public required Expr Left { get; init; }
+    public required Expr Right { get; init; }
 }
 
 public class ExprUnary : Expr
 {
-    public required int OperatorToken;
-    public required Expr Expr;
+    public required int OperatorToken { get; init; }
+    public required Expr Expr { get; init; }
 }
 
 public abstract class ExprPrimary : Expr
@@ -86,16 +86,16 @@ public abstract class ExprPrimary : Expr
 
 public class ExprInt : ExprPrimary
 {
-    public required int LiteralToken;
+    public required int LiteralToken { get; init; }
 }
 
 public class ExprIdentifier : ExprPrimary
 {
-    public required int IdentifierToken;
+    public required int IdentifierToken { get; init; }
 }
 
 public class ExprCall : ExprPrimary
 {
-    public required int IdentifierToken;
-    public required List<Expr> Args;
+    public required int IdentifierToken { get; init; }
+    public required List<Expr> Args { get; init; }
 }

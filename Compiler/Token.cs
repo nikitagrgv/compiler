@@ -10,6 +10,8 @@ public struct Token
     public required int Line;
     public required int Column;
 
+    public bool IsInvalid() => Type == TokenType.Invalid;
+
     public ReadOnlySpan<char> Value(string code)
     {
         return code.AsSpan(Position, Length);
