@@ -224,10 +224,7 @@ public class Parser
                     Advance();
                 }
 
-                if (SkipToNext(TokenType.Semicolon))
-                {
-                    Advance();
-                }
+                SkipUntilAfter(TokenType.Semicolon);
             }
         }
 
