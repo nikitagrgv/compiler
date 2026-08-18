@@ -220,7 +220,10 @@ public class Parser
                     Advance();
                 }
 
-                SkipToNext(TokenType.RBrace);
+                if (SkipToNext(TokenType.Semicolon))
+                {
+                    Advance();
+                }
             }
         }
 
