@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Compiler;
 
 public class Parser
@@ -87,12 +89,14 @@ public class Parser
         return pos;
     }
 
-    private bool SkipToNext(TokenType type)
+    private bool SkipUntilAfter(TokenType type)
     {
+        Debug.Assert(type != TokenType.Eof);
         while (!IsAtEnd())
         {
             if (Check(type))
             {
+                ++_cursor;
                 return true;
             }
 
