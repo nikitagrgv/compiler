@@ -256,7 +256,7 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
-                RecoveryAfter(prevCursor, TokenType.Semicolon);
+                RecoveryAfter(prevCursor, TokenType.Semicolon, TokenType.LBrace, TokenType.RBrace);
             }
         }
 
