@@ -157,11 +157,20 @@ public class Parser
         Expect(TokenType.LPar);
         if (!Check(TokenType.RPar))
         {
-            do
+            int prevCursor = _cursor;
+            try
             {
-                Param param = ParseParam();
-                parameters.Add(param);
-            } while (TryConsume(TokenType.Comma));
+                do
+                {
+                    Param param = ParseParam();
+                    parameters.Add(param);
+                } while (TryConsume(TokenType.Comma));
+            }
+            catch (UnexpectedTokenException e)
+            {
+                ReportError(e);
+                GoTo(prevCursor, TokenType.RPar);
+            }
         }
 
         Expect(TokenType.RPar);
