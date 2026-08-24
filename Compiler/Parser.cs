@@ -89,6 +89,17 @@ public class Parser
         return pos;
     }
 
+    private void MustBe(TokenType type)
+    {
+        if (Check(type))
+        {
+            return;
+        }
+
+        Token given = _tokens[_cursor];
+        throw new UnexpectedTokenException(given, type);
+    }
+
     private bool GoTo(int prevCursor, params TokenType[] types)
     {
         Debug.Assert(types.Length > 0 && !types.Contains(TokenType.Eof));
@@ -218,7 +229,7 @@ public class Parser
             {
                 ReportError(e);
                 GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
-                Expect(TokenType.LBrace);
+                MustBe(TokenType.LBrace);
             }
             // else - already reported
         }
@@ -229,7 +240,7 @@ public class Parser
             Token given = _tokens[_cursor];
             ReportError(given, TokenType.LBrace);
             GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
-            Expect(TokenType.LBrace);
+            MustBe(TokenType.LBrace);
         }
 
         Block body = ParseBlock();
