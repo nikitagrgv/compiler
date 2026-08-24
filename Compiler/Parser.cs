@@ -157,20 +157,20 @@ public class Parser
         Expect(TokenType.LPar);
         if (!Check(TokenType.RPar))
         {
-            int prevCursor = _cursor;
-            try
+            do
             {
-                do
+                int prevCursor = _cursor;
+                try
                 {
                     Param param = ParseParam();
                     parameters.Add(param);
-                } while (TryConsume(TokenType.Comma));
-            }
-            catch (UnexpectedTokenException e)
-            {
-                ReportError(e);
-                GoTo(prevCursor, TokenType.RPar);
-            }
+                }
+                catch (UnexpectedTokenException e)
+                {
+                    ReportError(e);
+                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar);
+                }
+            } while (TryConsume(TokenType.Comma));
         }
 
         Expect(TokenType.RPar);
@@ -556,7 +556,7 @@ public class Parser
         string str = $"Unexpected token: {value}";
         if (expected != null)
         {
-            str += ". Expected " + expected.Value.PrettyName();
+            str += ". Expected " + expected.Value.ErrorMessageName();
         }
 
         return str;

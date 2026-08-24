@@ -69,6 +69,16 @@ public static class TokenTypeUtils
             };
         }
 
+        public string ErrorMessageName()
+        {
+            return type switch
+            {
+                TokenType.Identifier => "Identifier",
+                TokenType.LiteralInt => "LiteralInt",
+                _ => type.PrettyName()
+            };
+        }
+
         public bool IsLiteral
         {
             get
