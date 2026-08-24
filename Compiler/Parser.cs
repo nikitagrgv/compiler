@@ -206,7 +206,7 @@ public class Parser
         }
         catch (UnexpectedTokenException e)
         {
-            if (recoveredToLbrace)
+            if (!recoveredToLbrace)
             {
                 ReportError(e);
                 GoTo(begin, TokenType.LBrace);
