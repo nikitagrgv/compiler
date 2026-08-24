@@ -319,7 +319,14 @@ public class Parser
             }
         }
 
-        Expect(TokenType.RBrace);
+        if (!IsAtEnd())
+        {
+            Expect(TokenType.RBrace);
+        }
+        else
+        {
+            ReportError(Peek(), TokenType.RBrace);
+        }
 
         int end = End(begin);
         return new Block
