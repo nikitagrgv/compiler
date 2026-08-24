@@ -164,12 +164,13 @@ public class Parser
                 {
                     Param param = ParseParam();
                     parameters.Add(param);
-                    if (Check(TokenType.RPar))
+                    if (TryConsume(TokenType.Comma))
                     {
-                        break;
+                        continue;
                     }
 
-                    Expect(TokenType.Comma);
+                    Expect(TokenType.RPar);
+                    break;
                 }
                 catch (UnexpectedTokenException e)
                 {
