@@ -164,13 +164,12 @@ public class Parser
                 {
                     Param param = ParseParam();
                     parameters.Add(param);
-                    if (TryConsume(TokenType.Comma))
+                    if (Check(TokenType.RPar))
                     {
-                        continue;
+                        break;
                     }
 
-                    Expect(TokenType.RPar);
-                    break;
+                    Expect(TokenType.Comma);
                 }
                 catch (UnexpectedTokenException e)
                 {
@@ -187,9 +186,15 @@ public class Parser
             }
         }
 
+        TypeDecl? returnType = null;
         try
         {
             Expect(TokenType.RPar);
+
+            if (TryConsume(TokenType.Colon))
+            {
+                returnType = ParseType();
+            }
         }
         catch (UnexpectedTokenException e)
         {
@@ -203,12 +208,6 @@ public class Parser
                 }
             }
             // else - already reported
-        }
-
-        TypeDecl? returnType = null;
-        if (TryConsume(TokenType.Colon))
-        {
-            returnType = ParseType();
         }
 
         Block body = ParseBlock();
