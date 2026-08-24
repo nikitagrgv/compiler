@@ -89,7 +89,7 @@ public class Parser
         return pos;
     }
 
-    private bool RecoveryAfter(int prevCursor, params TokenType[] types)
+    private bool GoTo(int prevCursor, params TokenType[] types)
     {
         Debug.Assert(types.Length > 0);
 
@@ -101,29 +101,6 @@ public class Parser
         while (!IsAtEnd())
         {
             if (types.Contains(Peek().Type))
-            {
-                Advance();
-                return true;
-            }
-
-            Advance();
-        }
-
-        return false;
-    }
-
-    private bool RecoveryOn(int prevCursor, TokenType type)
-    {
-        Debug.Assert(type != TokenType.Eof);
-
-        if (_cursor <= prevCursor)
-        {
-            Advance();
-        }
-
-        while (!IsAtEnd())
-        {
-            if (Check(type))
             {
                 return true;
             }
@@ -155,7 +132,7 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
-                RecoveryOn(prevCursor, TokenType.KeywordFunc);
+                GoTo(prevCursor, TokenType.KeywordFunc);
             }
         }
 
@@ -256,7 +233,11 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
-                RecoveryAfter(prevCursor, TokenType.Semicolon, TokenType.LBrace, TokenType.RBrace);
+                GoTo(prevCursor, TokenType.Semicolon, TokenType.LBrace, TokenType.RBrace);
+                if (Check(TokenType.Semicolon))
+                {
+                    Advance();
+                }
             }
         }
 
