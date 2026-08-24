@@ -157,11 +157,12 @@ public class Parser
         Expect(TokenType.LPar);
 
         bool recoveredToLbrace = false;
+        int prevCursor = _cursor;
         if (!Check(TokenType.RPar))
         {
             while (true)
             {
-                int prevCursor = _cursor;
+                prevCursor = _cursor;
                 try
                 {
                     Param param = ParseParam();
@@ -194,6 +195,7 @@ public class Parser
             }
         }
 
+        prevCursor = _cursor;
         TypeDecl? returnType = null;
         try
         {
@@ -201,6 +203,7 @@ public class Parser
 
             if (TryConsume(TokenType.Colon))
             {
+                prevCursor = _cursor;
                 returnType = ParseType();
             }
         }
@@ -209,13 +212,21 @@ public class Parser
             if (!recoveredToLbrace)
             {
                 ReportError(e);
-                GoTo(begin, TokenType.LBrace);
+                GoTo(prevCursor, TokenType.LBrace);
                 if (!Check(TokenType.LBrace))
                 {
                     throw;
                 }
             }
             // else - already reported
+        }
+
+        prevCursor = _cursor;
+        if (!Check(TokenType.LBrace))
+        {
+            Token given = _tokens[_cursor];
+            ReportError(given, TokenType.LBrace);
+            GoTo(prevCursor, TokenType.LBrace);
         }
 
         Block body = ParseBlock();
@@ -573,13 +584,18 @@ public class Parser
 
     private void ReportError(UnexpectedTokenException e)
     {
+        ReportError(e.GivenToken, e.Expected);
+    }
+
+    private void ReportError(Token given, TokenType? expected = null)
+    {
         _hasErrors = true;
-        string message = UnexpectedTokenMessage(e.GivenToken, e.Expected);
+        string message = UnexpectedTokenMessage(given, expected);
         _diag?.AddError(message,
-            e.GivenToken.Position,
-            e.GivenToken.Length,
-            e.GivenToken.Line,
-            e.GivenToken.Column);
+            given.Position,
+            given.Length,
+            given.Line,
+            given.Column);
     }
 
     private string UnexpectedTokenMessage(Token given, TokenType? expected = null)
