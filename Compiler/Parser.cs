@@ -174,11 +174,6 @@ public class Parser
                 catch (UnexpectedTokenException e)
                 {
                     ReportError(e);
-                    if (Check(TokenType.RPar))
-                    {
-                        break;
-                    }
-
                     GoTo(prevCursor, TokenType.Comma, TokenType.RPar);
                     if (Check(TokenType.Comma))
                     {
