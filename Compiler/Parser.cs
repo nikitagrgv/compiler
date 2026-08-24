@@ -540,6 +540,7 @@ public class Parser
 
     private void ReportError(UnexpectedTokenException e)
     {
+        _hasErrors = true;
         string message = UnexpectedTokenMessage(e.GivenToken, e.Expected);
         _diag?.AddError(message,
             e.GivenToken.Position,
