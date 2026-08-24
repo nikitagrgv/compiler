@@ -233,7 +233,13 @@ public class Parser
             catch (UnexpectedTokenException e)
             {
                 ReportError(e);
-                GoTo(prevCursor, TokenType.Semicolon, TokenType.LBrace, TokenType.RBrace);
+                GoTo(prevCursor,
+                    TokenType.Semicolon,
+                    TokenType.KeywordLet,
+                    TokenType.KeywordReturn,
+                    TokenType.LBrace,
+                    TokenType.RBrace
+                );
                 if (Check(TokenType.Semicolon))
                 {
                     Advance();
