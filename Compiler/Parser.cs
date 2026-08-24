@@ -176,6 +176,7 @@ public class Parser
                 {
                     ReportError(e);
                     GoTo(prevCursor, TokenType.Comma, TokenType.RPar);
+                    break;
                 }
             }
         }
