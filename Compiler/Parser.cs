@@ -238,10 +238,9 @@ public class Parser
         if (!Check(TokenType.LBrace))
         {
             Token given = _tokens[_cursor];
+            ReportError(given, TokenType.LBrace);
             GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
             MustBe(TokenType.LBrace);
-            // Report after MustBe to not report twice
-            ReportError(given, TokenType.LBrace);
         }
 
         Block body = ParseBlock();
