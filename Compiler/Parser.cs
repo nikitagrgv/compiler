@@ -186,12 +186,24 @@ public class Parser
             }
         }
 
-        Expect(TokenType.RPar);
-
         TypeDecl? returnType = null;
-        if (TryConsume(TokenType.Colon))
+        try
         {
-            returnType = ParseType();
+            Expect(TokenType.RPar);
+
+            if (TryConsume(TokenType.Colon))
+            {
+                returnType = ParseType();
+            }
+        }
+        catch (UnexpectedTokenException e)
+        {
+            ReportError(e);
+            GoTo(begin, TokenType.LBrace);
+            if (!Check(TokenType.LBrace))
+            {
+                throw;
+            }
         }
 
         Block body = ParseBlock();
