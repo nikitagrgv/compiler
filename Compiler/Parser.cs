@@ -207,7 +207,7 @@ public class Parser
                     throw;
                 }
             }
-            // else - already handled
+            // else - already reported
         }
 
         Block body = ParseBlock();
