@@ -186,34 +186,6 @@ public class Parser
             }
         }
 
-
-        Expect(TokenType.LPar);
-        if (!Check(TokenType.RPar))
-        {
-            while (true)
-            {
-                int prevCursor = _cursor;
-                try
-                {
-                    Param param = ParseParam();
-                    parameters.Add(param);
-                    if (Check(TokenType.RPar))
-                    {
-                        break;
-                    }
-
-                    Expect(TokenType.Comma);
-                    Advance();
-                }
-                catch (UnexpectedTokenException e)
-                {
-                    ReportError(e);
-                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar);
-                    break;
-                }
-            }
-        }
-
         Expect(TokenType.RPar);
 
         TypeDecl? returnType = null;
