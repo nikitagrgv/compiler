@@ -155,6 +155,8 @@ public class Parser
 
         List<Param> parameters = [];
         Expect(TokenType.LPar);
+
+        bool recoveredToLbrace = false;
         if (!Check(TokenType.RPar))
         {
             while (true)
@@ -175,6 +177,12 @@ public class Parser
                 {
                     ReportError(e);
                     GoTo(prevCursor, TokenType.Comma, TokenType.RPar, TokenType.LBrace);
+                    if (Check(TokenType.LBrace))
+                    {
+                        recoveredToLbrace = true;
+                        break;
+                    }
+
                     if (Check(TokenType.Comma))
                     {
                         Advance();
@@ -198,7 +206,7 @@ public class Parser
         }
         catch (UnexpectedTokenException e)
         {
-            if (e.GivenToken.Type != TokenType.LBrace)
+            if (recoveredToLbrace)
             {
                 ReportError(e);
                 GoTo(begin, TokenType.LBrace);
