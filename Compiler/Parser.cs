@@ -93,7 +93,7 @@ public class Parser
     {
         Debug.Assert(types.Length > 0 && !types.Contains(TokenType.Eof));
 
-        if (_cursor <= prevCursor)
+        if (_cursor <= prevCursor && !types.Contains(Peek().Type))
         {
             Advance();
         }
