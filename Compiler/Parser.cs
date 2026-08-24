@@ -177,7 +177,12 @@ public class Parser
                 catch (UnexpectedTokenException e)
                 {
                     ReportError(e);
-                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar, TokenType.LBrace);
+                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar, TokenType.LBrace, TokenType.KeywordFunc);
+                    if (Check(TokenType.KeywordFunc))
+                    {
+                        throw new UnexpectedTokenException(Peek(), null);
+                    }
+
                     if (Check(TokenType.LBrace))
                     {
                         recoveredToLbrace = true;
@@ -212,11 +217,8 @@ public class Parser
             if (!recoveredToLbrace)
             {
                 ReportError(e);
-                GoTo(prevCursor, TokenType.LBrace);
-                if (!Check(TokenType.LBrace))
-                {
-                    throw;
-                }
+                GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
+                Expect(TokenType.LBrace);
             }
             // else - already reported
         }
@@ -226,7 +228,8 @@ public class Parser
         {
             Token given = _tokens[_cursor];
             ReportError(given, TokenType.LBrace);
-            GoTo(prevCursor, TokenType.LBrace);
+            GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
+            Expect(TokenType.LBrace);
         }
 
         Block body = ParseBlock();
