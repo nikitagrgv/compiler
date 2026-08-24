@@ -174,7 +174,7 @@ public class Parser
                 catch (UnexpectedTokenException e)
                 {
                     ReportError(e);
-                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar);
+                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar, TokenType.LBrace);
                     if (Check(TokenType.Comma))
                     {
                         Advance();
@@ -198,12 +198,16 @@ public class Parser
         }
         catch (UnexpectedTokenException e)
         {
-            ReportError(e);
-            GoTo(begin, TokenType.LBrace);
-            if (!Check(TokenType.LBrace))
+            if (e.GivenToken.Type != TokenType.LBrace)
             {
-                throw;
+                ReportError(e);
+                GoTo(begin, TokenType.LBrace);
+                if (!Check(TokenType.LBrace))
+                {
+                    throw;
+                }
             }
+            // else - already handled
         }
 
         Block body = ParseBlock();
