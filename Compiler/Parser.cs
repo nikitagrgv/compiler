@@ -157,7 +157,7 @@ public class Parser
         Expect(TokenType.LPar);
 
         bool recoveredToLbrace = false;
-        int prevCursor = _cursor;
+        int prevCursor;
         if (!Check(TokenType.RPar))
         {
             while (true)
