@@ -91,7 +91,7 @@ public class Parser
 
     private bool GoTo(int prevCursor, params TokenType[] types)
     {
-        Debug.Assert(types.Length > 0);
+        Debug.Assert(types.Length > 0 && !types.Contains(TokenType.Eof));
 
         if (_cursor <= prevCursor)
         {
