@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Compiler;
 
 public class TypeRegistry
@@ -7,12 +5,14 @@ public class TypeRegistry
     private struct FuncSignature : IEquatable<FuncSignature>
     {
         public Type ReturnType;
-        public List<Type> ParamTypes;
+        public IReadOnlyList<Type> ParamTypes;
 
         public bool Equals(FuncSignature other)
         {
             return ReturnType == other.ReturnType && ParamTypes.SequenceEqual(other.ParamTypes);
         }
+
+        public override bool Equals(object? obj) => obj is FuncSignature other && Equals(other);
 
         public override int GetHashCode()
         {
@@ -34,7 +34,7 @@ public class TypeRegistry
         FuncSignature signature = new()
         {
             ReturnType = returnType,
-            ParamTypes = paramTypes,
+            ParamTypes = [.. paramTypes],
         };
 
         if (_funcTypes.TryGetValue(signature, out FuncType? type))
@@ -42,10 +42,10 @@ public class TypeRegistry
             return type;
         }
 
-        type = new FuncType()
+        type = new FuncType
         {
-            ReturnType = returnType,
-            ParamTypes = paramTypes,
+            ReturnType = signature.ReturnType,
+            ParamTypes = signature.ParamTypes,
         };
         _funcTypes.Add(signature, type);
         return type;

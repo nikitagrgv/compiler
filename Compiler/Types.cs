@@ -21,8 +21,8 @@ public class BuiltinType : Type
 
 public sealed class FuncType : Type
 {
-    public required List<Type> ParamTypes { get; init; }
+    public required IReadOnlyList<Type> ParamTypes { get; init; }
     public required Type ReturnType { get; init; }
 
-    public override string Name => $"({string.Join(", ", ParamTypes)}): {ReturnType.Name}";
+    public override string Name => $"({string.Join(", ", ParamTypes.Select(t => t.Name))}): {ReturnType.Name}";
 }
