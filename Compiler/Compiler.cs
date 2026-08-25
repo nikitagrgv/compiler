@@ -81,6 +81,9 @@ public class Compiler
             return false;
         }
 
+        Sema sema = new();
+        bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _diag);
+
         _diag.Report();
         return !_diag.HasErrors;
     }
