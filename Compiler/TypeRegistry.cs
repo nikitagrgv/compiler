@@ -31,16 +31,22 @@ public class TypeRegistry
 
     public FuncType GetFuncType(Type returnType, List<Type> paramTypes)
     {
+        FuncSignature lookupSignature = new()
+        {
+            ReturnType = returnType,
+            ParamTypes = paramTypes,
+        };
+
+        if (_funcTypes.TryGetValue(lookupSignature, out FuncType? type))
+        {
+            return type;
+        }
+
         FuncSignature signature = new()
         {
             ReturnType = returnType,
             ParamTypes = [.. paramTypes],
         };
-
-        if (_funcTypes.TryGetValue(signature, out FuncType? type))
-        {
-            return type;
-        }
 
         type = new FuncType
         {
