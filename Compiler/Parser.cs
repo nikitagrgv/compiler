@@ -529,34 +529,33 @@ public class Parser
     private Expr ParsePostfix()
     {
         int begin = _cursor;
-        Expr left = ParsePrimary();
+        Expr callee = ParsePrimary();
 
-        if (!Check(TokenType.LPar))
+        while (TryConsume(TokenType.LPar))
         {
-            return left;
-        }
-
-        List<Expr> args = [];
-        Expect(TokenType.LPar);
-        if (!Check(TokenType.RPar))
-        {
-            do
+            List<Expr> args = [];
+            if (!Check(TokenType.RPar))
             {
-                Expr expr = ParseExpr();
-                args.Add(expr);
-            } while (TryConsume(TokenType.Comma));
+                do
+                {
+                    Expr expr = ParseExpr();
+                    args.Add(expr);
+                } while (TryConsume(TokenType.Comma));
+            }
+
+            Expect(TokenType.RPar);
+
+            int end = End(begin);
+            return new ExprCall
+            {
+                StartToken = begin,
+                EndToken = end,
+                Callee = callee,
+                Args = args
+            };
         }
 
-        Expect(TokenType.RPar);
-
-        int end = End(begin);
-        return new ExprCall
-        {
-            StartToken = begin,
-            EndToken = end,
-            Callee = left,
-            Args = args
-        };
+        return callee;
     }
 
     private Expr ParsePrimary()
