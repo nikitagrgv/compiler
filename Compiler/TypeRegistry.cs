@@ -1,36 +1,53 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Compiler;
 
 public class TypeRegistry
 {
-    private HashSet<FuncType> _funcTypes = new(FuncComparer.Instance);
-
-    private class FuncComparer : IEqualityComparer<FuncType>
+    private struct FuncSignature : IEquatable<FuncSignature>
     {
-        public static readonly FuncComparer Instance = new();
+        public Type ReturnType;
+        public List<Type> ParamTypes;
 
-        public void GetFuncType(Type returnType, List<Type> paramTypes)
+        public bool Equals(FuncSignature other)
         {
-            
+            return ReturnType == other.ReturnType && ParamTypes.SequenceEqual(other.ParamTypes);
         }
 
-        public bool Equals(FuncType? x, FuncType? y)
-        {
-            if (ReferenceEquals(x, y)) return true;
-            if (x is null) return false;
-            if (y is null) return false;
-            return x.ReturnType == y.ReturnType && x.ParamTypes.SequenceEqual(y.ParamTypes);
-        }
-
-        public int GetHashCode(FuncType obj)
+        public override int GetHashCode()
         {
             HashCode hc = new();
-            hc.Add(obj.ReturnType);
-            foreach (Type t in obj.ParamTypes)
+            hc.Add(ReturnType);
+            foreach (Type t in ParamTypes)
             {
                 hc.Add(t);
             }
 
             return hc.ToHashCode();
         }
+    }
+
+    private readonly Dictionary<FuncSignature, FuncType> _funcTypes = new();
+
+    public FuncType GetFuncType(Type returnType, List<Type> paramTypes)
+    {
+        FuncSignature signature = new()
+        {
+            ReturnType = returnType,
+            ParamTypes = paramTypes,
+        };
+
+        if (_funcTypes.TryGetValue(signature, out FuncType? type))
+        {
+            return type;
+        }
+
+        type = new FuncType()
+        {
+            ReturnType = returnType,
+            ParamTypes = paramTypes,
+        };
+        _funcTypes.Add(signature, type);
+        return type;
     }
 }
