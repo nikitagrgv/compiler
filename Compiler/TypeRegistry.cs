@@ -34,7 +34,7 @@ public class TypeRegistry
         FuncSignature lookupSignature = new()
         {
             ReturnType = returnType,
-            ParamTypes = paramTypes,
+            ParamTypes = paramTypes, // don't copy the list
         };
 
         if (_funcTypes.TryGetValue(lookupSignature, out FuncType? type))
@@ -45,7 +45,7 @@ public class TypeRegistry
         FuncSignature signature = new()
         {
             ReturnType = returnType,
-            ParamTypes = [.. paramTypes],
+            ParamTypes = [.. paramTypes], // copy the list, ensure immutability
         };
 
         type = new FuncType
