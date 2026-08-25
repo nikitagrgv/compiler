@@ -546,7 +546,7 @@ public class Parser
             Expect(TokenType.RPar);
 
             int end = End(begin);
-            return new ExprCall
+            callee = new ExprCall
             {
                 StartToken = begin,
                 EndToken = end,
