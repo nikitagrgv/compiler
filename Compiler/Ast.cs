@@ -96,6 +96,6 @@ public class ExprIdentifier : ExprPrimary
 
 public class ExprCall : ExprPrimary
 {
-    public required int IdentifierToken { get; init; }
+    public required Expr Callee { get; init; }
     public required List<Expr> Args { get; init; }
 }

@@ -237,6 +237,7 @@ public class Compiler
                 break;
             case ExprCall n:
                 Console.WriteLine($"{fullPrefix}Call: {PrettyExpr(n)}");
+                PrintAst(depth + 1, n.Callee);
                 n.Args.ForEach(arg => PrintAst(depth + 1, arg));
                 break;
             case ExprInt n:
@@ -272,7 +273,7 @@ public class Compiler
                 break;
             case ExprCall exprCall:
                 ret = "";
-                ret += TokenValue(exprCall.IdentifierToken);
+                ret += PrettyExpr(exprCall.Callee);
                 ret += "(";
                 for (int i = 0; i < exprCall.Args.Count; ++i)
                 {

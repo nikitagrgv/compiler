@@ -523,7 +523,40 @@ public class Parser
             };
         }
 
-        return ParsePrimary();
+        return ParsePostfix();
+    }
+
+    private Expr ParsePostfix()
+    {
+        int begin = _cursor;
+        Expr left = ParsePrimary();
+
+        if (!Check(TokenType.LPar))
+        {
+            return left;
+        }
+
+        List<Expr> args = [];
+        Expect(TokenType.LPar);
+        if (!Check(TokenType.RPar))
+        {
+            do
+            {
+                Expr expr = ParseExpr();
+                args.Add(expr);
+            } while (TryConsume(TokenType.Comma));
+        }
+
+        Expect(TokenType.RPar);
+
+        int end = End(begin);
+        return new ExprCall
+        {
+            StartToken = begin,
+            EndToken = end,
+            Callee = left,
+            Args = args
+        };
     }
 
     private Expr ParsePrimary()
@@ -549,11 +582,6 @@ public class Parser
 
         if (Check(TokenType.Identifier))
         {
-            if (CheckNext(TokenType.LPar))
-            {
-                return ParseCall();
-            }
-
             return ParseIdentifier();
         }
 
@@ -571,35 +599,6 @@ public class Parser
             StartToken = begin,
             EndToken = end,
             IdentifierToken = identifierToken
-        };
-    }
-
-    private Expr ParseCall()
-    {
-        int begin = _cursor;
-
-        int identifierToken = Expect(TokenType.Identifier);
-
-        List<Expr> args = [];
-        Expect(TokenType.LPar);
-        if (!Check(TokenType.RPar))
-        {
-            do
-            {
-                Expr expr = ParseExpr();
-                args.Add(expr);
-            } while (TryConsume(TokenType.Comma));
-        }
-
-        Expect(TokenType.RPar);
-
-        int end = End(begin);
-        return new ExprCall
-        {
-            StartToken = begin,
-            EndToken = end,
-            IdentifierToken = identifierToken,
-            Args = args
         };
     }
 
