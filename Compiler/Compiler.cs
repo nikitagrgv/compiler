@@ -60,23 +60,25 @@ public class Compiler
             Console.WriteLine("================================");
         }
 
-        Parser parser = new(_code, _tokens);
-        CompilationUnit unit;
-        try
+        Parser parser = new();
+        Parser.Result parserResult = parser.Run(_code, _tokens, _diag);
+
+        if (parserResult.HasErrors)
         {
-            unit = parser.Run();
-        }
-        catch (ParseException e)
-        {
-            Console.WriteLine($"Parse Exception: {e.Message}");
-            return false;
+            Console.WriteLine("Parser had errors");
         }
 
         if (_flags.DebugParser)
         {
             Console.WriteLine("================================");
-            PrintAst(unit);
+            PrintAst(parserResult.CompilationUnit);
             Console.WriteLine("================================");
+        }
+
+        if (parserResult.HasErrors)
+        {
+            _diag.Report();
+            return false;
         }
 
         _diag.Report();
@@ -235,6 +237,7 @@ public class Compiler
                 break;
             case ExprCall n:
                 Console.WriteLine($"{fullPrefix}Call: {PrettyExpr(n)}");
+                PrintAst(depth + 1, n.Callee);
                 n.Args.ForEach(arg => PrintAst(depth + 1, arg));
                 break;
             case ExprInt n:
@@ -270,7 +273,7 @@ public class Compiler
                 break;
             case ExprCall exprCall:
                 ret = "";
-                ret += TokenValue(exprCall.IdentifierToken);
+                ret += PrettyExpr(exprCall.Callee);
                 ret += "(";
                 for (int i = 0; i < exprCall.Args.Count; ++i)
                 {

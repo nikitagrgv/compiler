@@ -356,6 +356,69 @@ public class LexerTest
     }
 
     [Theory]
+    [InlineData("#abc", 1)]
+    [InlineData("$abc", 1)]
+    [InlineData("$#$abc", 3)]
+    [InlineData("abc$#$", 3)]
+    [InlineData("a$b#c$", 3)]
+    [InlineData("гды123", 3)]
+    [InlineData("123гды", 3)]
+    public void Lexer_ReportsErrorForEachUnexpectedSymbols(string str, int numErrors)
+    {
+        Diagnostic diag = new();
+        Lexer lexer = new();
+        Lexer.Result result = lexer.Run(str, diag);
+
+        Assert.True(result.HasErrors);
+        Assert.True(diag.HasErrors);
+
+        Assert.Equal(numErrors, diag.Entries.Count);
+    }
+
+    [Theory]
+    [InlineData("#abc", 0)]
+    [InlineData("a#bc", 1)]
+    [InlineData("ab#c", 2)]
+    [InlineData("abc#", 3)]
+    public void Lexer_ReportsPositionOfUnexpectedSymbolsCorrectly(string str, int pos)
+    {
+        Diagnostic diag = new();
+        Lexer lexer = new();
+        Lexer.Result result = lexer.Run(str, diag);
+
+        Assert.True(result.HasErrors);
+        Assert.True(diag.HasErrors);
+
+        Assert.Single(diag.Entries);
+
+        Assert.Equal(pos, diag.Entries[0].Position);
+        Assert.Equal(1, diag.Entries[0].Length);
+    }
+
+    [Theory]
+    [InlineData("ab#cd", TokenType.Identifier, TokenType.Identifier)]
+    [InlineData("ab#12", TokenType.Identifier, TokenType.LiteralInt)]
+    [InlineData("12#ab", TokenType.LiteralInt, TokenType.Identifier)]
+    [InlineData("12#12", TokenType.LiteralInt, TokenType.LiteralInt)]
+    public void Lexer_UnexpectedSymbolSplitsCode(string str, TokenType left, TokenType right)
+    {
+        Diagnostic diag = new();
+        Lexer lexer = new();
+        Lexer.Result result = lexer.Run(str, diag);
+
+        Assert.True(result.HasErrors);
+        Assert.True(diag.HasErrors);
+        Assert.Single(diag.Entries);
+
+        Assert.Equal(4, result.Tokens.Count);
+
+        Assert.Equal(left, result.Tokens[0].Type);
+        Assert.Equal(TokenType.Invalid, result.Tokens[1].Type);
+        Assert.Equal(right, result.Tokens[2].Type);
+        Assert.Equal(TokenType.Eof, result.Tokens[3].Type);
+    }
+
+    [Theory]
     [InlineData(" ")]
     [InlineData("   ")]
     [InlineData("\n")]

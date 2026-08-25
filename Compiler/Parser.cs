@@ -1,27 +1,43 @@
-namespace Compiler;
+using System.Diagnostics;
 
-public class ParseException(string message) : Exception(message)
-{
-}
+namespace Compiler;
 
 public class Parser
 {
-    private readonly string _code;
-    private readonly List<Token> _tokens;
+    private string _code = "";
+    private Diagnostic? _diag;
+    private bool _hasErrors = false;
+    private List<Token> _tokens = [];
     private int _cursor;
 
-    public Parser(string code, List<Token> tokens)
+    private class UnexpectedTokenException(Token given, TokenType? expected)
+        : Exception($"Unexpected token: {given.Type}")
     {
-        _code = code;
-        _tokens = tokens;
-        _cursor = 0;
+        public Token GivenToken { get; init; } = given;
+        public TokenType? Expected { get; init; } = expected;
     }
 
-    public CompilationUnit Run()
+    public struct Result
     {
+        public CompilationUnit CompilationUnit;
+        public bool HasErrors;
+    }
+
+    public Result Run(string code, List<Token> tokens, Diagnostic diag)
+    {
+        _code = code;
+        _diag = diag;
+        _tokens = tokens;
+        _hasErrors = false;
         _cursor = 0;
+
         CompilationUnit compilationUnit = ParseCompilationUnit();
-        return compilationUnit;
+        Result result = new()
+        {
+            CompilationUnit = compilationUnit,
+            HasErrors = _hasErrors,
+        };
+        return result;
     }
 
     private Token Peek(int n = 0)
@@ -65,11 +81,45 @@ public class Parser
         int pos = _cursor;
         if (!Check(type))
         {
-            throw new ParseException(UnexpectedTokenMessage(expected: type));
+            Token given = _tokens[_cursor];
+            throw new UnexpectedTokenException(given, type);
         }
 
         Advance();
         return pos;
+    }
+
+    private void MustBe(TokenType type)
+    {
+        if (Check(type))
+        {
+            return;
+        }
+
+        Token given = _tokens[_cursor];
+        throw new UnexpectedTokenException(given, type);
+    }
+
+    private bool GoTo(int prevCursor, params TokenType[] types)
+    {
+        Debug.Assert(types.Length > 0 && !types.Contains(TokenType.Eof));
+
+        if (_cursor <= prevCursor && !types.Contains(Peek().Type))
+        {
+            Advance();
+        }
+
+        while (!IsAtEnd())
+        {
+            if (types.Contains(Peek().Type))
+            {
+                return true;
+            }
+
+            Advance();
+        }
+
+        return false;
     }
 
     private int End(int begin)
@@ -84,8 +134,17 @@ public class Parser
         List<FuncDecl> funcDecls = [];
         while (!IsAtEnd())
         {
-            FuncDecl decl = ParseFuncDecl();
-            funcDecls.Add(decl);
+            int prevCursor = _cursor;
+            try
+            {
+                FuncDecl decl = ParseFuncDecl();
+                funcDecls.Add(decl);
+            }
+            catch (UnexpectedTokenException e)
+            {
+                ReportError(e);
+                GoTo(prevCursor, TokenType.KeywordFunc);
+            }
         }
 
         int end = End(begin);
@@ -107,21 +166,81 @@ public class Parser
 
         List<Param> parameters = [];
         Expect(TokenType.LPar);
+
+        bool recoveredToLbrace = false;
+        int prevCursor;
         if (!Check(TokenType.RPar))
         {
-            do
+            while (true)
             {
-                Param param = ParseParam();
-                parameters.Add(param);
-            } while (TryConsume(TokenType.Comma));
+                prevCursor = _cursor;
+                try
+                {
+                    Param param = ParseParam();
+                    parameters.Add(param);
+                    if (Check(TokenType.RPar))
+                    {
+                        break;
+                    }
+
+                    Expect(TokenType.Comma);
+                }
+                catch (UnexpectedTokenException e)
+                {
+                    ReportError(e);
+                    GoTo(prevCursor, TokenType.Comma, TokenType.RPar, TokenType.LBrace, TokenType.KeywordFunc);
+                    if (Check(TokenType.KeywordFunc))
+                    {
+                        throw new UnexpectedTokenException(Peek(), null);
+                    }
+
+                    if (Check(TokenType.LBrace))
+                    {
+                        recoveredToLbrace = true;
+                        break;
+                    }
+
+                    if (Check(TokenType.Comma))
+                    {
+                        Advance();
+                        continue;
+                    }
+
+                    break;
+                }
+            }
         }
 
-        Expect(TokenType.RPar);
-
+        prevCursor = _cursor;
         TypeDecl? returnType = null;
-        if (TryConsume(TokenType.Colon))
+        try
         {
-            returnType = ParseType();
+            Expect(TokenType.RPar);
+
+            if (TryConsume(TokenType.Colon))
+            {
+                prevCursor = _cursor;
+                returnType = ParseType();
+            }
+        }
+        catch (UnexpectedTokenException e)
+        {
+            if (!recoveredToLbrace)
+            {
+                ReportError(e);
+                GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
+                MustBe(TokenType.LBrace);
+            }
+            // else - already reported
+        }
+
+        prevCursor = _cursor;
+        if (!Check(TokenType.LBrace))
+        {
+            Token given = _tokens[_cursor];
+            ReportError(given, TokenType.LBrace);
+            GoTo(prevCursor, TokenType.LBrace, TokenType.KeywordFunc);
+            MustBe(TokenType.LBrace);
         }
 
         Block body = ParseBlock();
@@ -176,11 +295,37 @@ public class Parser
 
         while (!Check(TokenType.RBrace) && !IsAtEnd())
         {
-            Stmt stmt = ParseStmt();
-            stmts.Add(stmt);
+            int prevCursor = _cursor;
+            try
+            {
+                Stmt stmt = ParseStmt();
+                stmts.Add(stmt);
+            }
+            catch (UnexpectedTokenException e)
+            {
+                ReportError(e);
+                GoTo(prevCursor,
+                    TokenType.Semicolon,
+                    TokenType.KeywordLet,
+                    TokenType.KeywordReturn,
+                    TokenType.LBrace,
+                    TokenType.RBrace
+                );
+                if (Check(TokenType.Semicolon))
+                {
+                    Advance();
+                }
+            }
         }
 
-        Expect(TokenType.RBrace);
+        if (!IsAtEnd())
+        {
+            Expect(TokenType.RBrace);
+        }
+        else
+        {
+            ReportError(Peek(), TokenType.RBrace);
+        }
 
         int end = End(begin);
         return new Block
@@ -378,7 +523,39 @@ public class Parser
             };
         }
 
-        return ParsePrimary();
+        return ParsePostfix();
+    }
+
+    private Expr ParsePostfix()
+    {
+        int begin = _cursor;
+        Expr callee = ParsePrimary();
+
+        while (TryConsume(TokenType.LPar))
+        {
+            List<Expr> args = [];
+            if (!Check(TokenType.RPar))
+            {
+                do
+                {
+                    Expr expr = ParseExpr();
+                    args.Add(expr);
+                } while (TryConsume(TokenType.Comma));
+            }
+
+            Expect(TokenType.RPar);
+
+            int end = End(begin);
+            callee = new ExprCall
+            {
+                StartToken = begin,
+                EndToken = end,
+                Callee = callee,
+                Args = args
+            };
+        }
+
+        return callee;
     }
 
     private Expr ParsePrimary()
@@ -404,15 +581,11 @@ public class Parser
 
         if (Check(TokenType.Identifier))
         {
-            if (CheckNext(TokenType.LPar))
-            {
-                return ParseCall();
-            }
-
             return ParseIdentifier();
         }
 
-        throw new ParseException(UnexpectedTokenMessage());
+        Token token = _tokens[_cursor];
+        throw new UnexpectedTokenException(token, null);
     }
 
     private Expr ParseIdentifier()
@@ -428,48 +601,34 @@ public class Parser
         };
     }
 
-    private Expr ParseCall()
+    private void ReportError(UnexpectedTokenException e)
     {
-        int begin = _cursor;
-
-        int identifierToken = Expect(TokenType.Identifier);
-
-        List<Expr> args = [];
-        Expect(TokenType.LPar);
-        if (!Check(TokenType.RPar))
-        {
-            do
-            {
-                Expr expr = ParseExpr();
-                args.Add(expr);
-            } while (TryConsume(TokenType.Comma));
-        }
-
-        Expect(TokenType.RPar);
-
-        int end = End(begin);
-        return new ExprCall
-        {
-            StartToken = begin,
-            EndToken = end,
-            IdentifierToken = identifierToken,
-            Args = args
-        };
+        ReportError(e.GivenToken, e.Expected);
     }
 
-    private string UnexpectedTokenMessage(TokenType? expected = null)
+    private void ReportError(Token given, TokenType? expected = null)
     {
-        Token token = _tokens[_cursor];
-        string value = token.Value(_code).ToString();
+        _hasErrors = true;
+        string message = UnexpectedTokenMessage(given, expected);
+        _diag?.AddError(message,
+            given.Position,
+            given.Length,
+            given.Line,
+            given.Column);
+    }
+
+    private string UnexpectedTokenMessage(Token given, TokenType? expected = null)
+    {
+        string value = given.Value(_code).ToString();
         if (value.Length <= 0)
         {
-            value = token.Type.PrettyName();
+            value = given.Type.PrettyName();
         }
 
-        string str = $"Unexpected token at {token.Line}:{token.Column}: {value}";
+        string str = $"Unexpected token: {value}";
         if (expected != null)
         {
-            str += ". Expected " + expected.Value.PrettyName();
+            str += ". Expected " + expected.Value.ErrorMessageName();
         }
 
         return str;

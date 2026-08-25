@@ -2,7 +2,7 @@ namespace Compiler;
 
 public class Lexer
 {
-    private string? _code;
+    private string _code = "";
     private Diagnostic? _diag;
     private bool _hasErrors = false;
 
@@ -104,7 +104,11 @@ public class Lexer
                 {
                     token.Type = TokenType.Invalid;
                     _hasErrors = true;
-                    _diag.AddError("Invalid integer literal", token);
+                    _diag.AddError("Invalid integer literal",
+                        token.Position,
+                        token.Length,
+                        token.Line,
+                        token.Column);
                 }
 
                 tokens.Add(token);
@@ -125,10 +129,14 @@ public class Lexer
                     Column = column,
                 };
                 tokens.Add(invalidToken);
-                pos++;
-                column++;
+                pos += wordLen;
+                column += wordLen;
                 _hasErrors = true;
-                _diag.AddError("Invalid token", invalidToken);
+                _diag.AddError("Invalid token",
+                    invalidToken.Position,
+                    invalidToken.Length,
+                    invalidToken.Line,
+                    invalidToken.Column);
                 continue;
             }
 
@@ -196,8 +204,7 @@ public class Lexer
         if (!IsWordStart(str[0]))
         {
             valid = false;
-
-            len = 0;
+            len = 1;
             return;
         }
 
