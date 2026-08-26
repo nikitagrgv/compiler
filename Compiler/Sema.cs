@@ -10,7 +10,9 @@ public class Sema
     private List<Token> _tokens = [];
     private TypeRegistry _typeRegistry = new();
 
+    private int _curScopeId = 0;
     private readonly List<Symbol> _allSymbols = new(); // For debug
+
     private readonly Dictionary<string, int> _nameToSymbolIndex = new();
     private readonly List<Symbol> _symbolsStack = new();
     private readonly List<int> _symbolsScopeCounts = new();
@@ -23,6 +25,7 @@ public class Sema
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
 
+        _curScopeId = 0;
         _allSymbols.Clear();
         _nameToSymbolIndex.Clear();
         _symbolsStack.Clear();
@@ -98,6 +101,7 @@ public class Sema
 
     private void PushScope()
     {
+        _curScopeId++;
         _symbolsScopeCounts.Add(0);
     }
 
@@ -128,6 +132,8 @@ public class Sema
     {
         Debug.Assert(!_nameToSymbolIndex.ContainsKey(sym.Name));
         Debug.Assert(_symbolsScopeCounts.Count > 0);
+
+        sym.ScopeId = _curScopeId;
 
         int symbolIndex = _symbolsStack.Count;
         int lastScope = _symbolsScopeCounts.Count - 1;
