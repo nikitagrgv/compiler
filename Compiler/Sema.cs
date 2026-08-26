@@ -55,7 +55,8 @@ public class Sema
             Symbol sym = new()
             {
                 Type = funcType,
-                Name = name
+                Name = name,
+                Declaration = funcDecl,
             };
             RegisterSymbol(sym);
         }
