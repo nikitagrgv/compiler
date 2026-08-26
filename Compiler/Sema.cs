@@ -225,7 +225,13 @@ public class Sema
         foreach (Symbol sym in _allSymbols)
         {
             Token startToken = _tokens[sym.Declaration.StartToken];
-            Console.WriteLine($"{startToken.Line,5}:{startToken.Column,-2} | {sym.Name,-10} | {sym.Type.Name}");
+            string str = $"{startToken.Line,5}:{startToken.Column,-2} | {sym.Name,-10} | {sym.Type.Name}";
+            if (sym.ScopeId != 0)
+            {
+                str += $" | Scope: {_curScopeId}";
+            }
+
+            Console.WriteLine(str);
         }
     }
 }
