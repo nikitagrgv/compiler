@@ -75,6 +75,12 @@ public class Sema
             };
             RegisterSymbol(sym);
         }
+
+        MarkSymbols(func.Body);
+    }
+
+    private void MarkSymbols(Block block)
+    {
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
