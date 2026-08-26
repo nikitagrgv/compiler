@@ -7,6 +7,7 @@ public class Compiler
         public bool DebugLexer = false;
         public bool DebugLexerPretty = false;
         public bool DebugParser = false;
+        public bool DebugSema = false;
     }
 
     private readonly IFileSystem _fs;
@@ -83,6 +84,14 @@ public class Compiler
 
         Sema sema = new();
         bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _tokens, _diag);
+
+        if (_flags.DebugSema)
+        {
+            Console.WriteLine("================================");
+            
+            Console.WriteLine("================================");
+        }
+
         if (!semaResult)
         {
             _diag.Report();
