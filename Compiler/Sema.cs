@@ -225,7 +225,7 @@ public class Sema
         foreach (Symbol sym in _allSymbols)
         {
             Token startToken = _tokens[sym.Declaration.StartToken];
-            string str = $"{startToken.Line,5}:{startToken.Column,-2} | {sym.Name,-10} | {sym.Type.Name,-20}";
+            string str = $"{startToken.Line,5}:{startToken.Column,-2} | {sym.Name,-10} | {sym.Type.Name,-26}";
             if (sym.ScopeId != 0)
             {
                 str += $" | Scope ID: {sym.ScopeId}";
