@@ -10,7 +10,9 @@ public class Sema
     private List<Token> _tokens = [];
     private TypeRegistry _typeRegistry = new();
 
-    private Dictionary<string, Symbol> _symbols = new();
+    private readonly Dictionary<string, int> _nameToSymbolIndex = new();
+    private readonly List<Symbol> _symbolsStack = new();
+    private readonly List<int> _symbolsScopeCounts = new();
 
     public bool Run(CompilationUnit unit, string code, List<Token> tokens, Diagnostic diag)
     {
@@ -19,7 +21,10 @@ public class Sema
         _hasErrors = false;
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
-        _symbols.Clear();
+
+        _nameToSymbolIndex.Clear();
+        _symbolsStack.Clear();
+        _symbolsScopeCounts.Clear();
 
         Run(unit);
 
@@ -52,15 +57,49 @@ public class Sema
         }
     }
 
-    private void RegisterSymbol(string name, Symbol sym)
+    private void PushScope()
     {
-        Debug.Assert(!HasSymbol(name));
-        _symbols[name] = sym;
+        _symbolsScopeCounts.Add(0);
+    }
+
+    private void PopScope()
+    {
+        Debug.Assert(_symbolsScopeCounts.Count > 0);
+        Debug.Assert(_symbolsScopeCounts.Sum() == _symbolsStack.Count);
+
+        int lastScopeIndex = _symbolsScopeCounts.Count - 1;
+        int countSymbolsInScope = _symbolsScopeCounts[lastScopeIndex];
+        while (countSymbolsInScope > 0)
+        {
+            Symbol sym = _symbolsStack.Last();
+            _symbolsStack.RemoveAt(_symbolsStack.Count - 1);
+
+            bool ok = _nameToSymbolIndex.Remove(sym.Name);
+            Debug.Assert(ok);
+
+            countSymbolsInScope--;
+        }
+
+        _symbolsScopeCounts.RemoveAt(lastScopeIndex);
+
+        Debug.Assert(_symbolsScopeCounts.Sum() == _symbolsStack.Count);
+    }
+
+    private void RegisterSymbol(Symbol sym)
+    {
+        Debug.Assert(!HasSymbol(sym.Name));
+        Debug.Assert(_symbolsScopeCounts.Count > 0);
+
+        int symbolIndex = _symbolsStack.Count;
+        int lastScope = _symbolsScopeCounts.Count - 1;
+        _symbolsStack.Add(sym);
+        _symbolsScopeCounts[lastScope]++;
+        _nameToSymbolIndex[sym.Name] = symbolIndex;
     }
 
     private bool HasSymbol(string name)
     {
-        return _symbols.ContainsKey(name);
+        return _symbolsStack.ContainsKey(name);
     }
 
     private FuncType GetFuncType(FuncDecl funcDecl)
@@ -138,7 +177,7 @@ public class Sema
     public void PrintDebug()
     {
         Console.WriteLine("Symbols:");
-        foreach (KeyValuePair<string, Symbol> it in _symbols)
+        foreach (KeyValuePair<string, Symbol> it in _symbolsStack)
         {
             Symbol sym = it.Value;
             Console.WriteLine($"{sym.Name} | {sym.Type.Name}");
