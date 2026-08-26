@@ -187,7 +187,7 @@ public class Sema
         foreach (Symbol sym in _allSymbols)
         {
             Token startToken = _tokens[sym.Declaration.StartToken];
-            Console.WriteLine($"{startToken.Length}:{startToken.Column} | {sym.Name} | {sym.Type.Name}");
+            Console.WriteLine($"{startToken.Line}:{startToken.Column} | {sym.Name} | {sym.Type.Name}");
         }
     }
 }
