@@ -228,7 +228,7 @@ public class Sema
             string str = $"{startToken.Line,5}:{startToken.Column,-2} | {sym.Name,-10} | {sym.Type.Name,-16}";
             if (sym.ScopeId != 0)
             {
-                str += $" | Scope: {sym.ScopeId}";
+                str += $" | Scope ID: {sym.ScopeId}";
             }
 
             Console.WriteLine(str);
