@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Compiler;
 
 public class Sema
@@ -17,7 +19,7 @@ public class Sema
         _hasErrors = false;
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
-        _symbols = new Dictionary<string, Symbol>();
+        _symbols.Clear();
 
         Run(unit);
 
@@ -34,7 +36,7 @@ public class Sema
         foreach (FuncDecl funcDecl in unit.FuncDecls)
         {
             string name = GetTokenValue(funcDecl.NameToken);
-            if (_symbols.ContainsKey(name))
+            if (HasSymbol(name))
             {
                 ReportSymbolRedefinition(name, funcDecl.NameToken);
                 continue;
@@ -46,8 +48,19 @@ public class Sema
                 Type = funcType,
                 Name = name
             };
-            _symbols[name] = sym;
+            RegisterSymbol(name, sym);
         }
+    }
+
+    private void RegisterSymbol(string name, Symbol sym)
+    {
+        Debug.Assert(!HasSymbol(name));
+        _symbols[name] = sym;
+    }
+
+    private bool HasSymbol(string name)
+    {
+        return _symbols.ContainsKey(name);
     }
 
     private FuncType GetFuncType(FuncDecl funcDecl)
