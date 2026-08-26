@@ -35,6 +35,7 @@ public class Sema
     {
         PushScope();
         CollectFunctions(unit);
+        PopScope();
     }
 
     private void CollectFunctions(CompilationUnit unit)
@@ -88,7 +89,7 @@ public class Sema
 
     private void RegisterSymbol(Symbol sym)
     {
-        Debug.Assert(!HasSymbol(sym.Name));
+        Debug.Assert(!_nameToSymbolIndex.ContainsKey(sym.Name));
         Debug.Assert(_symbolsScopeCounts.Count > 0);
 
         int symbolIndex = _symbolsStack.Count;
@@ -178,7 +179,7 @@ public class Sema
     public void PrintDebug()
     {
         Console.WriteLine("Symbols:");
-        foreach (KeyValuePair<string, Symbol> it in _symbolsStack)
+        foreach ()
         {
             Symbol sym = it.Value;
             Console.WriteLine($"{sym.Name} | {sym.Type.Name}");
