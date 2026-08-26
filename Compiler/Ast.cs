@@ -92,6 +92,8 @@ public class ExprInt : ExprPrimary
 public class ExprIdentifier : ExprPrimary
 {
     public required int IdentifierToken { get; init; }
+
+    public Symbol? Symbol { get; set; }
 }
 
 public class ExprCall : ExprPrimary

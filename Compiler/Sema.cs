@@ -2,15 +2,6 @@ namespace Compiler;
 
 public class Sema
 {
-    private class Symbol
-    {
-        public required Type Type;
-        public required string Name;
-
-        public bool IsFunc => Type is FuncType;
-        public bool IsBuiltin => Type is BuiltinType;
-    }
-
     private string _code = "";
     private Diagnostic? _diag;
     private bool _hasErrors = false;
