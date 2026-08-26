@@ -56,4 +56,26 @@ public class TypeRegistry
         _funcTypes.Add(signature, type);
         return type;
     }
+
+    public Type? GetTypeByName(ReadOnlySpan<char> name)
+    {
+        BuiltinType? builtin = TryGetBuiltinType(name);
+        if (builtin != null)
+        {
+            return builtin;
+        }
+
+        // TODO: Structs/functions
+
+        return null;
+    }
+
+    private static BuiltinType? TryGetBuiltinType(ReadOnlySpan<char> name)
+    {
+        return name switch
+        {
+            "i32" => BuiltinType.I32,
+            _ => null
+        };
+    }
 }

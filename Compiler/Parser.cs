@@ -610,11 +610,7 @@ public class Parser
     {
         _hasErrors = true;
         string message = UnexpectedTokenMessage(given, expected);
-        _diag?.AddError(message,
-            given.Position,
-            given.Length,
-            given.Line,
-            given.Column);
+        _diag?.AddError(message, given);
     }
 
     private string UnexpectedTokenMessage(Token given, TokenType? expected = null)

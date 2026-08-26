@@ -60,6 +60,11 @@ public class Diagnostic
         HasErrors = true;
     }
 
+    public void AddError(string message, Token token)
+    {
+        AddError(message, token.Position, token.Length, token.Line, token.Column);
+    }
+
     public void Report()
     {
         foreach (DiagnosticEntry entry in _entries)
