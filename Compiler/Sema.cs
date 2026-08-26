@@ -99,7 +99,7 @@ public class Sema
 
     private bool HasSymbol(string name)
     {
-        return _symbolsStack.ContainsKey(name);
+        return _nameToSymbolIndex.ContainsKey(name);
     }
 
     private FuncType GetFuncType(FuncDecl funcDecl)
