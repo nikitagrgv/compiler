@@ -121,4 +121,11 @@ public class Sema
         _diag?.AddError($"Type not found: {token.Value(_code)}", token);
         _hasErrors = true;
     }
+
+
+    // TODO: Move out of here
+    public void Report()
+    {
+        
+    }
 }

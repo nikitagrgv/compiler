@@ -88,7 +88,7 @@ public class Compiler
         if (_flags.DebugSema)
         {
             Console.WriteLine("================================");
-            
+            sema.Report();
             Console.WriteLine("================================");
         }
 
