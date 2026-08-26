@@ -81,6 +81,32 @@ public class Sema
 
     private void MarkSymbols(Block block)
     {
+        foreach (Stmt stmt in block.Stmts)
+        {
+            MarkSymbols(stmt);
+        }
+    }
+
+    private void MarkSymbols(Stmt stmt)
+    {
+        switch (stmt)
+        {
+            case Block innerBlock:
+                PushScope();
+                MarkSymbols(innerBlock);
+                PopScope();
+                break;
+            case StmtAssign stmtAssign:
+                break;
+            case StmtExpr stmtExpr:
+                break;
+            case StmtLet stmtLet:
+                break;
+            case StmtReturn stmtReturn:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(stmt));
+        }
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
