@@ -108,10 +108,17 @@ public class Sema
         return value.ToString();
     }
 
-    private void ReportSymbolRedefinition(string name, int tokenIndex)
+    private void ReportSymbolRedefinition(string name, int nameToken)
     {
-        Token token = _tokens[tokenIndex];
+        Token token = _tokens[nameToken];
         _diag?.AddError($"Symbol redefinition: {name}", token);
+        _hasErrors = true;
+    }
+
+    private void ReportSymbolNotFound(int nameToken)
+    {
+        Token token = _tokens[nameToken];
+        _diag?.AddError($"Symbol not found: {token.Value(_code)}", token);
         _hasErrors = true;
     }
 
