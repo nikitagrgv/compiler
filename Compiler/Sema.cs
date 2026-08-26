@@ -72,10 +72,10 @@ public class Sema
         while (countSymbolsInScope > 0)
         {
             Symbol sym = _symbolsStack.Last();
-            _symbolsStack.RemoveAt(_symbolsStack.Count - 1);
+            Debug.Assert(_nameToSymbolIndex.ContainsKey(sym.Name));
 
-            bool ok = _nameToSymbolIndex.Remove(sym.Name);
-            Debug.Assert(ok);
+            _symbolsStack.RemoveAt(_symbolsStack.Count - 1);
+            _nameToSymbolIndex.Remove(sym.Name);
 
             countSymbolsInScope--;
         }
