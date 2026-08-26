@@ -44,6 +44,34 @@ public class Sema
     // TODO: Bad name?
     private void MarkSymbols(CompilationUnit unit)
     {
+        foreach (FuncDecl func in unit.FuncDecls)
+        {
+            PushScope();
+            MarkSymbols(func);
+            PopScope();
+        }
+    }
+
+    private void MarkSymbols(FuncDecl func)
+    {
+        foreach (Param param in func.Params)
+        {
+            string name = GetTokenValue(param.NameToken);
+            if (HasSymbol(name))
+            {
+                ReportSymbolRedefinition(name, param.NameToken);
+                continue;
+            }
+
+            Type type = TypeFromDecl(param.Type);
+            Symbol sym = new()
+            {
+                Type = type,
+                Name = name,
+                Declaration = param,
+            };
+            RegisterSymbol(sym);
+        }
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
@@ -120,14 +148,14 @@ public class Sema
         Type returnType = BuiltinType.Void;
         if (funcDecl.ReturnType != null)
         {
-            returnType = TypeFromDecl(funcDecl.ReturnType, out bool _);
+            returnType = TypeFromDecl(funcDecl.ReturnType);
         }
 
         // TODO: Reuse list
         List<Type> parameters = new();
         foreach (Param param in funcDecl.Params)
         {
-            Type paramType = TypeFromDecl(param.Type, out bool _);
+            Type paramType = TypeFromDecl(param.Type);
             parameters.Add(paramType);
         }
 
@@ -135,18 +163,16 @@ public class Sema
         return funcType;
     }
 
-    private Type TypeFromDecl(TypeDecl typeDecl, out bool ok)
+    private Type TypeFromDecl(TypeDecl typeDecl)
     {
         Type? rt = TryFindTypeFromDecl(typeDecl);
         if (rt != null)
         {
-            ok = true;
             return rt;
         }
 
         ReportTypeNotFound(typeDecl);
 
-        ok = false;
         return BuiltinType.Error;
     }
 
