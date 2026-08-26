@@ -183,10 +183,10 @@ public class Sema
     public void PrintDebug()
     {
         Console.WriteLine("Symbols:");
-        foreach ()
+        foreach (Symbol sym in _allSymbols)
         {
-            Symbol sym = it.Value;
-            Console.WriteLine($"{sym.Name} | {sym.Type.Name}");
+            Token startToken = _tokens[sym.Declaration.StartToken];
+            Console.WriteLine($"{startToken.Length}:{startToken.Column} | {sym.Name} | {sym.Type.Name}");
         }
     }
 }
