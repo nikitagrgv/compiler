@@ -41,6 +41,7 @@ public class Sema
         PopScope();
     }
 
+    // TODO: Bad name?
     private void MarkSymbols(CompilationUnit unit)
     {
     }
