@@ -124,7 +124,7 @@ public class Sema
 
 
     // TODO: Move out of here
-    public void Report()
+    public void PrintDebug()
     {
         Console.WriteLine("Symbols:");
         foreach (KeyValuePair<string, Symbol> it in _symbols)
