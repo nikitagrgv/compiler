@@ -36,11 +36,16 @@ public class Sema
     private void Run(CompilationUnit unit)
     {
         PushScope();
-        CollectFunctions(unit);
+        CollectFunctionsSymbols(unit);
+        MarkSymbols(unit);
         PopScope();
     }
 
-    private void CollectFunctions(CompilationUnit unit)
+    private void MarkSymbols(CompilationUnit unit)
+    {
+    }
+
+    private void CollectFunctionsSymbols(CompilationUnit unit)
     {
         foreach (FuncDecl funcDecl in unit.FuncDecls)
         {
