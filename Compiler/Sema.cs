@@ -10,6 +10,7 @@ public class Sema
     private List<Token> _tokens = [];
     private TypeRegistry _typeRegistry = new();
 
+    private readonly List<Symbol> _allSymbols = new(); // For debug
     private readonly Dictionary<string, int> _nameToSymbolIndex = new();
     private readonly List<Symbol> _symbolsStack = new();
     private readonly List<int> _symbolsScopeCounts = new();
@@ -22,6 +23,7 @@ public class Sema
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
 
+        _allSymbols.Clear();
         _nameToSymbolIndex.Clear();
         _symbolsStack.Clear();
         _symbolsScopeCounts.Clear();
@@ -97,6 +99,8 @@ public class Sema
         _symbolsStack.Add(sym);
         _symbolsScopeCounts[lastScope]++;
         _nameToSymbolIndex[sym.Name] = symbolIndex;
+
+        _allSymbols.Add(sym);
     }
 
     private bool HasSymbol(string name)
