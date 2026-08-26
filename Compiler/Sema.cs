@@ -130,7 +130,7 @@ public class Sema
         foreach (KeyValuePair<string, Symbol> it in _symbols)
         {
             Symbol sym = it.Value;
-            Console.WriteLine($"{sym.Name}: {sym.Type.Name}");
+            Console.WriteLine($"{sym.Name} | {sym.Type.Name}");
         }
     }
 }
