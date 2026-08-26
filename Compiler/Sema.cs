@@ -33,6 +33,7 @@ public class Sema
 
     private void Run(CompilationUnit unit)
     {
+        PushScope();
         CollectFunctions(unit);
     }
 
@@ -53,7 +54,7 @@ public class Sema
                 Type = funcType,
                 Name = name
             };
-            RegisterSymbol(name, sym);
+            RegisterSymbol(sym);
         }
     }
 
