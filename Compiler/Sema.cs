@@ -293,6 +293,12 @@ public class Sema
             return (left, right, left.Type);
         }
 
+        if (left.Type == BuiltinType.Error || right.Type == BuiltinType.Error)
+        {
+            // Don't report errors twice
+            return (left, right, BuiltinType.Error);
+        }
+
         Token token = _tokens[left.StartToken];
         _diag?.AddError($"Can't use {op.PrettyName()} with types {left.Type} and {right.Type}", token);
         _hasErrors = true;
