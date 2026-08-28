@@ -3,6 +3,11 @@ namespace Compiler;
 public abstract class Type
 {
     public abstract string Name { get; }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }
 
 public class BuiltinType : Type
