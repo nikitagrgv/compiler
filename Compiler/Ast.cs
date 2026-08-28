@@ -57,7 +57,7 @@ public class StmtAssign : Stmt
 {
     public required int AssignToken { get; init; }
     public required Expr Target { get; init; }
-    public required Expr Value { get; init; }
+    public required Expr Value { get; set; }
 }
 
 public class StmtExpr : Stmt

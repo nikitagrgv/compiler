@@ -147,6 +147,17 @@ public class Sema
     {
         Visit(stmt.Target);
         Visit(stmt.Value);
+
+        if (stmt.Target is not ExprIdentifier)
+        {
+            Token token = _tokens[stmt.Target.StartToken];
+            _diag?.AddError("Only an identifier can be a callee", token);
+            _hasErrors = true;
+            return;
+        }
+
+        Debug.Assert(stmt.Target.Type != null, "Must be already parsed in Visit");
+        Adapt(stmt.Value, stmt.Target.Type);
     }
 
     private void Visit(StmtLet stmt)
@@ -320,6 +331,11 @@ public class Sema
 
     private Expr Adapt(Expr expr, Type targetType)
     {
+        if (targetType == BuiltinType.Error)
+        {
+            return expr;
+        }
+
         Type? exprType = expr.Type;
         Debug.Assert(exprType != null, "Must be already parsed in Visit");
 
