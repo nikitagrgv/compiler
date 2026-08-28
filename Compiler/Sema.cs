@@ -183,7 +183,65 @@ public class Sema
 
     private void Visit(Expr expr)
     {
-        expr.Type = BuiltinType.Error;
+        switch (expr)
+        {
+            case ExprBinary e:
+                Visit(e);
+                break;
+            case ExprCall e:
+                Visit(e);
+                break;
+            case ExprIdentifier e:
+                Visit(e);
+                break;
+            case ExprInt e:
+                Visit(e);
+                break;
+            case ExprPrimary e:
+                Visit(e);
+                break;
+            case ExprUnary e:
+                Visit(e);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(expr));
+        }
+    }
+
+    private void Visit(ExprBinary expr)
+    {
+    }
+
+    private void Visit(ExprCall expr)
+    {
+    }
+
+    private void Visit(ExprIdentifier expr)
+    {
+        Debug.Assert(expr.Symbol == null);
+
+        string name = GetTokenValue(expr.IdentifierToken);
+        expr.Symbol = TryGetSymbol(name);
+        if (expr.Symbol == null)
+        {
+            ReportSymbolNotFound(expr.IdentifierToken);
+            expr.Type = BuiltinType.Error;
+            return;
+        }
+
+        expr.Type = expr.Symbol.Type;
+    }
+
+    private void Visit(ExprInt expr)
+    {
+    }
+
+    private void Visit(ExprPrimary expr)
+    {
+    }
+
+    private void Visit(ExprUnary expr)
+    {
     }
 
     private Expr Adapt(Expr expr, Type targetType)
@@ -270,6 +328,17 @@ public class Sema
         {
             _allSymbols.Add(sym);
         }
+    }
+
+    private Symbol? TryGetSymbol(string name)
+    {
+        bool ok = _nameToSymbolIndex.TryGetValue(name, out int index);
+        if (!ok)
+        {
+            return null;
+        }
+
+        return _symbolsStack[index];
     }
 
     private bool HasSymbol(string name)
