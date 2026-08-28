@@ -286,7 +286,7 @@ public class Sema
         }
 
         Token token = _tokens[expr.StartToken];
-        _diag?.AddError($"Can't do implicit cast from {expr.Type} to {targetType}", token);
+        _diag?.AddError($"Can't do implicit cast from `{expr.Type}` to `{targetType}`", token);
         _hasErrors = true;
         return expr;
     }
@@ -307,7 +307,7 @@ public class Sema
         }
 
         Token token = _tokens[left.StartToken];
-        _diag?.AddError($"Can't use {op.PrettyName()} with types {left.Type} and {right.Type}", token);
+        _diag?.AddError($"Can't use `{op.PrettyName()}` with types `{left.Type}` and `{right.Type}`", token);
         _hasErrors = true;
         return (left, right, BuiltinType.Error);
     }
