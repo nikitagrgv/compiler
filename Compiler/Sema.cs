@@ -38,7 +38,7 @@ public class Sema
 
         Run(unit);
 
-        return _hasErrors;
+        return !_hasErrors;
     }
 
     private void Run(CompilationUnit unit)
