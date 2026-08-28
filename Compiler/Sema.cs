@@ -223,7 +223,7 @@ public class Sema
         {
             // TODO: Support non-identifiers callees
             Token token = _tokens[expr.StartToken];
-            _diag?.AddError($"Only an identifier can be a callee", token);
+            _diag?.AddError("Only an identifier can be a callee", token);
             _hasErrors = true;
             expr.Type = BuiltinType.Error;
             return;
