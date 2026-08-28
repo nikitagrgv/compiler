@@ -112,7 +112,7 @@ public class Sema
                 Visit(s);
                 break;
             case StmtExpr s:
-                Visit(s);
+                Visit(s.Expr);
                 break;
             case StmtLet s:
                 Visit(s);
@@ -127,11 +127,7 @@ public class Sema
 
     private void Visit(StmtAssign stmt)
     {
-    }
-
-    private void Visit(StmtExpr stmt)
-    {
-        Visit(stmt.Expr);
+        Visit(stmt.Value);
     }
 
     private void Visit(StmtLet stmt)
