@@ -280,6 +280,12 @@ public class Sema
             return expr;
         }
 
+        if (expr.Type == BuiltinType.Error)
+        {
+            // Already reported
+            return expr;
+        }
+
         // TODO: Generate implicit cast nodes
         throw new NotImplementedException();
     }
