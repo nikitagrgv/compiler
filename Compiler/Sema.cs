@@ -218,6 +218,11 @@ public class Sema
 
     private void Visit(ExprCall expr)
     {
+        foreach (Expr arg in expr.Args)
+        {
+            Visit(arg);
+        }
+
         ExprIdentifier? identifier = expr.Callee as ExprIdentifier;
         if (identifier == null)
         {
