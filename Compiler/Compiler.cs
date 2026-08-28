@@ -69,21 +69,28 @@ public class Compiler
             Console.WriteLine("Parser had errors");
         }
 
-        if (_flags.DebugParser)
-        {
-            Console.WriteLine("================================");
-            PrintAst(parserResult.CompilationUnit);
-            Console.WriteLine("================================");
-        }
-
         if (parserResult.HasErrors)
         {
+            if (_flags.DebugParser)
+            {
+                Console.WriteLine("================================");
+                PrintAst(parserResult.CompilationUnit);
+                Console.WriteLine("================================");
+            }
+
             _diag.Report();
             return false;
         }
 
         Sema sema = new();
         bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _tokens, _diag, _flags.DebugSema);
+
+        if (_flags.DebugParser)
+        {
+            Console.WriteLine("================================");
+            PrintAst(parserResult.CompilationUnit);
+            Console.WriteLine("================================");
+        }
 
         if (_flags.DebugSema)
         {
