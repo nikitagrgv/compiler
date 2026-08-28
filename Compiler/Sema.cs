@@ -117,7 +117,6 @@ public class Sema
 
     private void Visit(StmtAssign stmt)
     {
-        
     }
 
     private void Visit(StmtExpr stmt)
@@ -130,7 +129,22 @@ public class Sema
         if (HasSymbol(name))
         {
             ReportSymbolRedefinition(name, stmt.NameToken);
+            return;
         }
+
+        if (stmt.Type == null)
+        {
+            throw new NotImplementedException();
+        }
+
+        Type type = TypeFromDecl(stmt.Type);
+        Symbol sym = new()
+        {
+            Type = type,
+            Name = name,
+            Declaration = stmt,
+        };
+        RegisterSymbol(sym);
     }
 
     private void Visit(StmtReturn stmt)
@@ -139,7 +153,6 @@ public class Sema
 
     private void Visit(Expr expr)
     {
-        
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
