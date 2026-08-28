@@ -197,6 +197,7 @@ public class Sema
         if (stmt.Expr != null)
         {
             Visit(stmt.Expr);
+            // Checks for unmatched return type
             stmt.Expr = Adapt(stmt.Expr, targetType);
         }
     }
