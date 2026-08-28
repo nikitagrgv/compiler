@@ -45,7 +45,7 @@ public class StmtLet : Stmt
 {
     public required int NameToken { get; init; }
     public required TypeDecl? Type { get; init; }
-    public required Expr? Expr { get; init; }
+    public required Expr? Expr { get; set; }
 }
 
 public class StmtReturn : Stmt

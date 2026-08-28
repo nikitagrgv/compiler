@@ -135,6 +135,8 @@ public class Sema
 
     private void Visit(StmtLet stmt)
     {
+        Debug.Assert(stmt.Type != null || stmt.Expr != null, "Parser must have already checked this");
+
         string name = GetTokenValue(stmt.NameToken);
         if (HasSymbol(name))
         {
@@ -148,25 +150,29 @@ public class Sema
             declType = TypeFromDecl(stmt.Type);
         }
 
-        Type? exprType = null;
         if (stmt.Expr != null)
         {
             Visit(stmt.Expr);
-            exprType = stmt.Expr.Type;
-
-            Debug.Assert(exprType != null);
+            if (declType != null)
+            {
+                stmt.Expr = Adapt(stmt.Expr, declType);
+                Debug.Assert(stmt.Expr.Type == declType);
+            }
+            else
+            {
+                declType = stmt.Expr.Type;
+            }
         }
 
-
-        Type type = TypeFromDecl(stmt.Type);
+        Debug.Assert(declType != null);
         Symbol sym = new()
         {
-            Type = type,
+            Type = declType,
             Name = name,
             Declaration = stmt,
         };
 
-        // NOTE: Only register after visiting the expression! So expression can't use the symbol
+        // NOTE: Only register after visiting the expression! So the expression can't use the symbol
         RegisterSymbol(sym);
     }
 
