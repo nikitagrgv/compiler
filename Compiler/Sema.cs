@@ -221,8 +221,12 @@ public class Sema
         ExprIdentifier? identifier = expr.Callee as ExprIdentifier;
         if (identifier == null)
         {
-            // Only function calls are supported for now
-            throw new NotImplementedException();
+            // TODO: Support non-identifiers callees
+            Token token = _tokens[expr.StartToken];
+            _diag?.AddError($"Only an identifier can be a callee, got: {expr.Callee.GetType().Name}", token);
+            _hasErrors = true;
+            expr.Type = BuiltinType.Error;
+            return;
         }
 
         Visit(identifier);
