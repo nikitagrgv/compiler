@@ -50,7 +50,7 @@ public class StmtLet : Stmt
 
 public class StmtReturn : Stmt
 {
-    public required Expr? Expr { get; init; }
+    public required Expr? Expr { get; set; }
 }
 
 public class StmtAssign : Stmt

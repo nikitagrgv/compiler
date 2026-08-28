@@ -179,7 +179,7 @@ public class Sema
         if (stmt.Expr != null)
         {
             Visit(stmt.Expr);
-            Adapt(stmt.Expr, targetType);
+            stmt.Expr = Adapt(stmt.Expr, targetType);
         }
     }
 
