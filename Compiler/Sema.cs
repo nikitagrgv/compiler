@@ -341,6 +341,7 @@ public class Sema
         }
     }
 
+    // NOTE: Spam doesn't support shadowing! yet
     private void PushScope()
     {
         _curScopeId++;
