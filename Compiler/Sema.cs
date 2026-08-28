@@ -94,22 +94,42 @@ public class Sema
     {
         switch (stmt)
         {
-            case Block innerBlock:
+            case Block block:
                 PushScope();
-                MarkSymbols(innerBlock);
+                MarkSymbols(block);
                 PopScope();
                 break;
-            case StmtAssign stmtAssign:
+            case StmtAssign s:
+                MarkSymbols(s);
                 break;
-            case StmtExpr stmtExpr:
+            case StmtExpr s:
+                MarkSymbols(s);
                 break;
-            case StmtLet stmtLet:
+            case StmtLet s:
+                MarkSymbols(s);
                 break;
-            case StmtReturn stmtReturn:
+            case StmtReturn s:
+                MarkSymbols(s);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(stmt));
         }
+    }
+
+    private void MarkSymbols(StmtAssign stmt)
+    {
+    }
+
+    private void MarkSymbols(StmtExpr stmt)
+    {
+    }
+
+    private void MarkSymbols(StmtLet stmt)
+    {
+    }
+
+    private void MarkSymbols(StmtReturn stmt)
+    {
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
