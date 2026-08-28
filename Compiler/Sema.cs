@@ -18,6 +18,7 @@ public class Sema
     private readonly Dictionary<string, int> _nameToSymbolIndex = new();
     private readonly List<Symbol> _symbolsStack = new();
     private readonly List<int> _symbolsScopeCounts = new();
+    private readonly List<Symbol> _functionsScope = new();
 
     public bool Run(CompilationUnit unit, string code, List<Token> tokens, Diagnostic diag, bool debug)
     {
@@ -26,6 +27,7 @@ public class Sema
         _hasErrors = false;
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
+        _functionsScope.Clear();
         _debug = debug;
 
         _curScopeId = 0;
@@ -51,9 +53,17 @@ public class Sema
     {
         foreach (FuncDecl func in unit.FuncDecls)
         {
+            Debug.Assert(func.Symbol != null, "Must be already parsed in CollectFunctionsSymbols");
+
+            Symbol funcSymbol = func.Symbol;
+            _functionsScope.Add(funcSymbol);
             PushScope();
             Visit(func);
             PopScope();
+
+            Debug.Assert(_functionsScope.Last() == funcSymbol);
+
+            _functionsScope.RemoveAt(_functionsScope.Count - 1);
         }
     }
 
@@ -132,6 +142,11 @@ public class Sema
             return;
         }
 
+        if (stmt.Expr != null)
+        {
+            Visit(stmt.Expr);
+        }
+
         if (stmt.Type == null)
         {
             throw new NotImplementedException();
@@ -144,6 +159,8 @@ public class Sema
             Name = name,
             Declaration = stmt,
         };
+
+        // NOTE: Only register after visiting the expression! So expression can't use the symbol
         RegisterSymbol(sym);
     }
 
