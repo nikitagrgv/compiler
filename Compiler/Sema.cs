@@ -80,6 +80,7 @@ public class Sema
             Symbol sym = new()
             {
                 Type = type,
+                Kind = SymbolKind.Param,
                 Name = name,
                 Declaration = param,
             };
@@ -194,6 +195,7 @@ public class Sema
         Symbol sym = new()
         {
             Type = declType,
+            Kind = SymbolKind.Local,
             Name = name,
             Declaration = stmt,
         };
@@ -392,6 +394,7 @@ public class Sema
             Symbol sym = new()
             {
                 Type = funcType,
+                Kind = SymbolKind.Func,
                 Name = name,
                 Declaration = funcDecl,
             };
