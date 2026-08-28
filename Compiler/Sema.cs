@@ -293,7 +293,10 @@ public class Sema
             return (left, right, left.Type);
         }
 
-        throw new NotImplementedException();
+        Token token = _tokens[left.StartToken];
+        _diag?.AddError($"Can't use {op.PrettyName()} with types {left.Type} and {right.Type}", token);
+        _hasErrors = true;
+        return (left, right, BuiltinType.Error);
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
