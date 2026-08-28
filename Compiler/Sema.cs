@@ -53,22 +53,20 @@ public class Sema
     {
         foreach (FuncDecl func in unit.FuncDecls)
         {
-            Debug.Assert(func.Symbol != null, "Must be already parsed in CollectFunctionsSymbols");
-
-            Symbol funcSymbol = func.Symbol;
-            _functionsScope.Add(funcSymbol);
             PushScope();
             Visit(func);
             PopScope();
-
-            Debug.Assert(_functionsScope.Last() == funcSymbol);
-
-            _functionsScope.RemoveAt(_functionsScope.Count - 1);
         }
     }
 
     private void Visit(FuncDecl func)
     {
+        Debug.Assert(func.Symbol != null, "Must be already parsed in CollectFunctionsSymbols");
+
+        Symbol funcSymbol = func.Symbol;
+        FuncType funcType = (FuncType)funcSymbol.Type;
+        _functionsScope.Add(funcSymbol);
+
         foreach (Param param in func.Params)
         {
             string name = GetTokenValue(param.NameToken);
@@ -89,6 +87,26 @@ public class Sema
         }
 
         Visit(func.Body);
+
+        if (funcType.ReturnType != BuiltinType.Void)
+        {
+            List<Stmt> stmts = func.Body.Stmts;
+            StmtReturn? ret = null;
+            if (stmts.Count > 0)
+            {
+                ret = stmts.Last() as StmtReturn;
+            }
+
+            if (ret == null)
+            {
+                Token token = _tokens[func.Body.EndToken];
+                _diag?.AddError($"No return at the end of function {funcSymbol.Name}", token);
+                _hasErrors = true;
+            }
+        }
+
+        Debug.Assert(_functionsScope.Last() == funcSymbol);
+        _functionsScope.RemoveAt(_functionsScope.Count - 1);
     }
 
     private void Visit(Block block)
