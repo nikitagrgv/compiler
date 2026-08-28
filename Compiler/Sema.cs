@@ -279,6 +279,18 @@ public class Sema
         throw new NotImplementedException();
     }
 
+    private (Expr, Expr) Adapt(Expr left, Expr right)
+    {
+        Debug.Assert(left.Type != null && right.Type != null, "Must be already parsed in Visit");
+
+        if (left.Type == right.Type)
+        {
+            return (left, right);
+        }
+
+        throw new NotImplementedException();
+    }
+
     private void CollectFunctionsSymbols(CompilationUnit unit)
     {
         foreach (FuncDecl funcDecl in unit.FuncDecls)
