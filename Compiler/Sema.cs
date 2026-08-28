@@ -258,7 +258,7 @@ public class Sema
         if (funcType.ParamTypes.Count != expr.Args.Count)
         {
             Token token = _tokens[expr.StartToken];
-            _diag?.AddError($"Calling {sym.Name} expected {funcType.ParamTypes.Count} arguments, got {expr.Args.Count}",
+            _diag?.AddError($"Calling {sym.Name} needs {funcType.ParamTypes.Count} arguments, got {expr.Args.Count}",
                 token);
             _hasErrors = true;
             expr.Type = BuiltinType.Error;
