@@ -127,6 +127,7 @@ public class Sema
 
     private void Visit(StmtAssign stmt)
     {
+        Visit(stmt.Target);
         Visit(stmt.Value);
     }
 
