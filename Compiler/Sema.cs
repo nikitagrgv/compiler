@@ -176,6 +176,11 @@ public class Sema
     private void Visit(StmtReturn stmt)
     {
         Type targetType = GetCurrentFunctionType().ReturnType;
+        if (stmt.Expr != null)
+        {
+            Visit(stmt.Expr);
+            Adapt(stmt.Expr, targetType);
+        }
     }
 
     private void Visit(Expr expr)
