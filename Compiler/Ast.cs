@@ -67,6 +67,7 @@ public class StmtExpr : Stmt
 
 public abstract class Expr : Node
 {
+    public Type? Type { get; }
 }
 
 public class ExprBinary : Expr

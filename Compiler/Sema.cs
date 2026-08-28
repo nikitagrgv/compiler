@@ -142,15 +142,21 @@ public class Sema
             return;
         }
 
+        Type? declType = null;
+        if (stmt.Type != null)
+        {
+            declType = TypeFromDecl(stmt.Type);
+        }
+
+        Type? exprType = null;
         if (stmt.Expr != null)
         {
             Visit(stmt.Expr);
+            exprType = stmt.Expr.Type;
+
+            Debug.Assert(exprType != null);
         }
 
-        if (stmt.Type == null)
-        {
-            throw new NotImplementedException();
-        }
 
         Type type = TypeFromDecl(stmt.Type);
         Symbol sym = new()
@@ -166,10 +172,25 @@ public class Sema
 
     private void Visit(StmtReturn stmt)
     {
+        Type targetType = GetCurrentFunctionType().ReturnType;
     }
 
     private void Visit(Expr expr)
     {
+    }
+
+    private Expr Adapt(Expr expr, Type targetType)
+    {
+        Type? exprType = expr.Type;
+        Debug.Assert(exprType != null, "Must be already parsed in Visit");
+
+        if (exprType == targetType)
+        {
+            return expr;
+        }
+
+        // TODO: Generate implicit casts nodes
+        throw new NotImplementedException();
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
