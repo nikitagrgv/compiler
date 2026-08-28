@@ -233,6 +233,7 @@ public class Sema
             Token token = _tokens[identifier.IdentifierToken];
             _diag?.AddError($"Callee must be a function, got type: {sym.Type}", token);
             _hasErrors = true;
+            expr.Type = BuiltinType.Error;
             return;
         }
 
