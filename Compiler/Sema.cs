@@ -211,6 +211,32 @@ public class Sema
 
     private void Visit(ExprCall expr)
     {
+        ExprIdentifier? identifier = expr.Callee as ExprIdentifier;
+        if (identifier == null)
+        {
+            // Only function calls are supported for now
+            throw new NotImplementedException();
+        }
+
+        Visit(identifier);
+        Symbol? sym = identifier.Symbol;
+        if (sym == null)
+        {
+            // Already reported for identifier
+            expr.Type = BuiltinType.Error;
+            return;
+        }
+
+        FuncType? funcType = sym.Type as FuncType;
+        if (funcType == null)
+        {
+            Token token = _tokens[identifier.IdentifierToken];
+            _diag?.AddError($"Callee must be a function, got type: {sym.Type}", token);
+            _hasErrors = true;
+            return;
+        }
+
+        expr.Type = funcType.ReturnType;
     }
 
     private void Visit(ExprIdentifier expr)
