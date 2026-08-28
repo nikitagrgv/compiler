@@ -268,6 +268,8 @@ public class Sema
 
     private void Visit(ExprUnary expr)
     {
+        Visit(expr.Expr);
+        expr.Type = expr.Expr.Type;
     }
 
     private Expr Adapt(Expr expr, Type targetType)
