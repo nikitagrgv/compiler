@@ -43,22 +43,21 @@ public class Sema
     {
         PushScope();
         CollectFunctionsSymbols(unit);
-        MarkSymbols(unit);
+        Visit(unit);
         PopScope();
     }
 
-    // TODO: Bad name?
-    private void MarkSymbols(CompilationUnit unit)
+    private void Visit(CompilationUnit unit)
     {
         foreach (FuncDecl func in unit.FuncDecls)
         {
             PushScope();
-            MarkSymbols(func);
+            Visit(func);
             PopScope();
         }
     }
 
-    private void MarkSymbols(FuncDecl func)
+    private void Visit(FuncDecl func)
     {
         foreach (Param param in func.Params)
         {
@@ -79,57 +78,68 @@ public class Sema
             RegisterSymbol(sym);
         }
 
-        MarkSymbols(func.Body);
+        Visit(func.Body);
     }
 
-    private void MarkSymbols(Block block)
+    private void Visit(Block block)
     {
         foreach (Stmt stmt in block.Stmts)
         {
-            MarkSymbols(stmt);
+            Visit(stmt);
         }
     }
 
-    private void MarkSymbols(Stmt stmt)
+    private void Visit(Stmt stmt)
     {
         switch (stmt)
         {
             case Block block:
                 PushScope();
-                MarkSymbols(block);
+                Visit(block);
                 PopScope();
                 break;
             case StmtAssign s:
-                MarkSymbols(s);
+                Visit(s);
                 break;
             case StmtExpr s:
-                MarkSymbols(s);
+                Visit(s);
                 break;
             case StmtLet s:
-                MarkSymbols(s);
+                Visit(s);
                 break;
             case StmtReturn s:
-                MarkSymbols(s);
+                Visit(s);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(stmt));
         }
     }
 
-    private void MarkSymbols(StmtAssign stmt)
+    private void Visit(StmtAssign stmt)
+    {
+        
+    }
+
+    private void Visit(StmtExpr stmt)
     {
     }
 
-    private void MarkSymbols(StmtExpr stmt)
+    private void Visit(StmtLet stmt)
+    {
+        string name = GetTokenValue(stmt.NameToken);
+        if (HasSymbol(name))
+        {
+            ReportSymbolRedefinition(name, stmt.NameToken);
+        }
+    }
+
+    private void Visit(StmtReturn stmt)
     {
     }
 
-    private void MarkSymbols(StmtLet stmt)
+    private void Visit(Expr expr)
     {
-    }
-
-    private void MarkSymbols(StmtReturn stmt)
-    {
+        
     }
 
     private void CollectFunctionsSymbols(CompilationUnit unit)
