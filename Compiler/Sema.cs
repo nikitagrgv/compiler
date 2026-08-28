@@ -189,7 +189,7 @@ public class Sema
             return expr;
         }
 
-        // TODO: Generate implicit casts nodes
+        // TODO: Generate implicit cast nodes
         throw new NotImplementedException();
     }
 
