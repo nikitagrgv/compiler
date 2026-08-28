@@ -286,8 +286,10 @@ public class Sema
             return expr;
         }
 
-        // TODO: Generate implicit cast nodes
-        throw new NotImplementedException();
+        Token token = _tokens[expr.StartToken];
+        _diag?.AddError($"Can't do implicit cast from {expr.Type} to {targetType}", token);
+        _hasErrors = true;
+        return expr;
     }
 
     private (Expr, Expr, Type) Adapt(Expr left, Expr right, TokenType op)
