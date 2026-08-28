@@ -295,7 +295,7 @@ public class Sema
 
         if (left.Type == BuiltinType.Error || right.Type == BuiltinType.Error)
         {
-            // Don't report errors twice
+            // Already reported
             return (left, right, BuiltinType.Error);
         }
 
