@@ -157,7 +157,7 @@ public class Sema
         }
 
         Debug.Assert(stmt.Target.Type != null, "Must be already parsed in Visit");
-        Adapt(stmt.Value, stmt.Target.Type);
+        stmt.Value = Adapt(stmt.Value, stmt.Target.Type);
     }
 
     private void Visit(StmtLet stmt)
