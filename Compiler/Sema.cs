@@ -154,7 +154,9 @@ public class Sema
             if (declType != null)
             {
                 stmt.Expr = Adapt(stmt.Expr, declType);
-                Debug.Assert(stmt.Expr.Type == declType);
+                Debug.Assert(stmt.Expr.Type == BuiltinType.Error ||
+                             declType == BuiltinType.Error ||
+                             stmt.Expr.Type == declType);
             }
             else
             {
