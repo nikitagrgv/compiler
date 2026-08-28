@@ -183,6 +183,7 @@ public class Sema
 
     private void Visit(Expr expr)
     {
+        expr.Type = BuiltinType.Error;
     }
 
     private Expr Adapt(Expr expr, Type targetType)
