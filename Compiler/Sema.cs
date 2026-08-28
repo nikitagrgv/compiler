@@ -217,6 +217,8 @@ public class Sema
                 Name = name,
                 Declaration = funcDecl,
             };
+            funcDecl.Symbol = sym;
+
             RegisterSymbol(sym);
         }
     }
