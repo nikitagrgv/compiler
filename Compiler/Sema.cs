@@ -10,6 +10,8 @@ public class Sema
     private List<Token> _tokens = [];
     private TypeRegistry _typeRegistry = new();
 
+    private bool _debug = false;
+
     private int _curScopeId = 0;
     private readonly List<Symbol> _allSymbols = new(); // For debug
 
@@ -17,13 +19,14 @@ public class Sema
     private readonly List<Symbol> _symbolsStack = new();
     private readonly List<int> _symbolsScopeCounts = new();
 
-    public bool Run(CompilationUnit unit, string code, List<Token> tokens, Diagnostic diag)
+    public bool Run(CompilationUnit unit, string code, List<Token> tokens, Diagnostic diag, bool debug)
     {
         _code = code;
         _diag = diag;
         _hasErrors = false;
         _tokens = tokens;
         _typeRegistry = new TypeRegistry();
+        _debug = debug;
 
         _curScopeId = 0;
         _allSymbols.Clear();
@@ -173,7 +176,10 @@ public class Sema
         _symbolsScopeCounts[lastScope]++;
         _nameToSymbolIndex[sym.Name] = symbolIndex;
 
-        _allSymbols.Add(sym);
+        if (_debug)
+        {
+            _allSymbols.Add(sym);
+        }
     }
 
     private bool HasSymbol(string name)
@@ -249,8 +255,7 @@ public class Sema
         _hasErrors = true;
     }
 
-
-    // TODO: Move out of here
+    // TODO: Move out of here?
     public void PrintDebug()
     {
         Console.WriteLine("Symbols:");
