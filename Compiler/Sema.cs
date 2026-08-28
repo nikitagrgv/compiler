@@ -222,7 +222,7 @@ public class Sema
         Symbol? sym = identifier.Symbol;
         if (sym == null)
         {
-            // Already reported for identifier
+            // Error already reported, just return
             expr.Type = BuiltinType.Error;
             return;
         }
