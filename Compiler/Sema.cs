@@ -131,6 +131,7 @@ public class Sema
 
     private void Visit(StmtExpr stmt)
     {
+        Visit(stmt.Expr);
     }
 
     private void Visit(StmtLet stmt)
