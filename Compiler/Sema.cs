@@ -247,6 +247,13 @@ public class Sema
         return _nameToSymbolIndex.ContainsKey(name);
     }
 
+    private FuncType GetCurrentFunctionType()
+    {
+        Debug.Assert(_functionsScope.Count > 0);
+        Type type = _functionsScope.Last().Type;
+        return (FuncType)type;
+    }
+
     private FuncType GetFuncType(FuncDecl funcDecl)
     {
         Type returnType = BuiltinType.Void;
