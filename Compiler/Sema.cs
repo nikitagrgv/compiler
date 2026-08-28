@@ -254,6 +254,21 @@ public class Sema
         }
 
         expr.Type = funcType.ReturnType;
+
+        if (funcType.ParamTypes.Count != expr.Args.Count)
+        {
+            Token token = _tokens[expr.StartToken];
+            _diag?.AddError($"Expected {funcType.ParamTypes.Count} arguments, got {expr.Args.Count}", token);
+            _hasErrors = true;
+            expr.Type = BuiltinType.Error;
+            return;
+        }
+
+        for (int i = 0; i < expr.Args.Count; i++)
+        {
+            Type expectedType = funcType.ParamTypes[i];
+            expr.Args[i] = Adapt(expr.Args[i], expectedType);
+        }
     }
 
     private void Visit(ExprIdentifier expr)
