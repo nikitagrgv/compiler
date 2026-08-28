@@ -73,8 +73,8 @@ public abstract class Expr : Node
 public class ExprBinary : Expr
 {
     public required int OperatorToken { get; init; }
-    public required Expr Left { get; init; }
-    public required Expr Right { get; init; }
+    public required Expr Left { get; set; }
+    public required Expr Right { get; set; }
 }
 
 public class ExprUnary : Expr

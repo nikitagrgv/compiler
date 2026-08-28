@@ -207,6 +207,11 @@ public class Sema
 
     private void Visit(ExprBinary expr)
     {
+        Token tok = _tokens[expr.OperatorToken];
+        TokenType op = tok.Type;
+        Visit(expr.Left);
+        Visit(expr.Right);
+        (expr.Left, expr.Right) = Adapt(expr.Left, expr.Right, op);
     }
 
     private void Visit(ExprCall expr)
@@ -279,7 +284,7 @@ public class Sema
         throw new NotImplementedException();
     }
 
-    private (Expr, Expr) Adapt(Expr left, Expr right)
+    private (Expr, Expr) Adapt(Expr left, Expr right, TokenType op)
     {
         Debug.Assert(left.Type != null && right.Type != null, "Must be already parsed in Visit");
 
