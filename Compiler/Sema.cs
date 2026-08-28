@@ -197,9 +197,6 @@ public class Sema
             case ExprInt e:
                 Visit(e);
                 break;
-            case ExprPrimary e:
-                Visit(e);
-                break;
             case ExprUnary e:
                 Visit(e);
                 break;
@@ -234,10 +231,7 @@ public class Sema
 
     private void Visit(ExprInt expr)
     {
-    }
-
-    private void Visit(ExprPrimary expr)
-    {
+        expr.Type = BuiltinType.I32;
     }
 
     private void Visit(ExprUnary expr)
