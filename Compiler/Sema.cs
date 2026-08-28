@@ -211,7 +211,7 @@ public class Sema
         TokenType op = tok.Type;
         Visit(expr.Left);
         Visit(expr.Right);
-        (expr.Left, expr.Right) = Adapt(expr.Left, expr.Right, op);
+        (expr.Left, expr.Right, expr.Type) = Adapt(expr.Left, expr.Right, op);
     }
 
     private void Visit(ExprCall expr)
@@ -286,13 +286,13 @@ public class Sema
         throw new NotImplementedException();
     }
 
-    private (Expr, Expr) Adapt(Expr left, Expr right, TokenType op)
+    private (Expr, Expr, Type) Adapt(Expr left, Expr right, TokenType op)
     {
         Debug.Assert(left.Type != null && right.Type != null, "Must be already parsed in Visit");
 
         if (left.Type == right.Type)
         {
-            return (left, right);
+            return (left, right, left.Type);
         }
 
         throw new NotImplementedException();
