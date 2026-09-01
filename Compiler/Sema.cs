@@ -151,6 +151,7 @@ public class Sema
 
         if (stmt.Target is not ExprIdentifier)
         {
+            // TODO: Support other
             Token token = _tokens[stmt.Target.StartToken];
             _diag?.AddError("Only an identifier can be a callee", token);
             _hasErrors = true;
