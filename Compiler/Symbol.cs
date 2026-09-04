@@ -1,18 +1,24 @@
 namespace Compiler;
 
-public enum SymbolKind
+// TODO: Merge subtypes to single Symbol class?
+public abstract class Symbol
 {
-    Func,
-    Param,
-    Local,
+    public required string Name { get; init; }
+    public required Scope DeclaringScope { get; init; }
+    public required Type Type;
 }
 
-public class Symbol
+public sealed class VariableSymbol : Symbol
 {
-    public required Type Type;
-    public required SymbolKind Kind;
-    public required string Name;
-    public required Node Declaration;
+    public required StmtLet Declaration { get; init; }
+}
 
-    public int ScopeId = -1; // For debug
+public sealed class ParamSymbol : Symbol
+{
+    public required Param Declaration { get; init; }
+}
+
+public sealed class FunctionSymbol : Symbol
+{
+    public required FuncDecl Declaration { get; init; }
 }

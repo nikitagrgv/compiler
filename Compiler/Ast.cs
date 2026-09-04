@@ -18,7 +18,7 @@ public class FuncDecl : Node
     public required TypeDecl? ReturnType { get; init; }
     public required Block Body { get; init; }
 
-    public Symbol? Symbol { get; set; }
+    public FunctionSymbol? Symbol { get; set; }
 }
 
 public class Param : Node

@@ -24,6 +24,8 @@ public class BuiltinType : Type
     public static readonly BuiltinType Error = new("<error>");
 }
 
+// Must be created from registry only
+// TODO: Force creation from registry. Private constructor?
 public sealed class FuncType : Type
 {
     public required IReadOnlyList<Type> ParamTypes { get; init; }
