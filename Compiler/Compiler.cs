@@ -100,12 +100,6 @@ public class Compiler
             Console.WriteLine("================================");
         }
 
-        if (_diag.HasErrors)
-        {
-            _diag.Report();
-            return false;
-        }
-
         _diag.Report();
         return !_diag.HasErrors;
     }
