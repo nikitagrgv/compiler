@@ -83,7 +83,7 @@ public class Compiler
         }
 
         Sema sema = new();
-        bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _tokens, _diag, _flags.DebugSema);
+        bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _tokens, _diag);
 
         // Print after sema to include sema info
         if (_flags.DebugParser)
