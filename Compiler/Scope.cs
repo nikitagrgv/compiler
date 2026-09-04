@@ -16,7 +16,7 @@ public class Scope
         Scope? cur = this;
         while (cur != null)
         {
-            Symbol? s = LookupLocal(name);
+            Symbol? s = cur.LookupLocal(name);
             if (s != null)
             {
                 return s;
