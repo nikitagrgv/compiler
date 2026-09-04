@@ -9,6 +9,8 @@ public abstract class Node
 public class CompilationUnit : Node
 {
     public required List<FuncDecl> FuncDecls { get; init; }
+
+    public Scope? Scope { get; set; }
 }
 
 public class FuncDecl : Node
@@ -32,6 +34,7 @@ public class Param : Node
 public class TypeDecl : Node
 {
     public required int TypeNameToken { get; init; }
+    public Type? ResolvedType { get; set; }
 }
 
 public abstract class Stmt : Node
@@ -41,6 +44,8 @@ public abstract class Stmt : Node
 public class Block : Stmt
 {
     public required List<Stmt> Stmts { get; init; }
+
+    public Scope? Scope { get; set; }
 }
 
 public class StmtLet : Stmt
@@ -71,7 +76,7 @@ public class StmtExpr : Stmt
 
 public abstract class Expr : Node
 {
-    public Type? Type { get; set; }
+    public Type? ResolvedType { get; set; }
 }
 
 public class ExprBinary : Expr
