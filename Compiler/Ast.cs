@@ -28,7 +28,7 @@ public class Param : Node
     public required int NameToken { get; init; }
     public required TypeDecl Type { get; init; }
 
-    public Symbol? Symbol { get; set; }
+    public ParamSymbol? Symbol { get; set; }
 }
 
 public class TypeDecl : Node
@@ -54,7 +54,7 @@ public class StmtLet : Stmt
     public required TypeDecl? Type { get; init; }
     public required Expr? Expr { get; set; }
 
-    public Symbol? Symbol { get; set; }
+    public VariableSymbol? Symbol { get; set; }
 }
 
 public class StmtReturn : Stmt

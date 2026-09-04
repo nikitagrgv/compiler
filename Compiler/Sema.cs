@@ -2,12 +2,12 @@ namespace Compiler;
 
 public class Sema
 {
-    private string _code;
-    private Diagnostic _diag;
-    private List<Token> _tokens;
-    private TypeRegistry _typeRegistry = new();
+    private readonly string _code;
+    private readonly Diagnostic _diag;
+    private readonly IReadOnlyList<Token> _tokens;
+    private readonly TypeRegistry _typeRegistry = new();
 
-    public Sema(string code, List<Token> tokens, Diagnostic diag)
+    public Sema(string code, IReadOnlyList<Token> tokens, Diagnostic diag)
     {
         _code = code;
         _diag = diag;
@@ -15,6 +15,10 @@ public class Sema
     }
 
     public void Run(CompilationUnit unit)
+    {
+    }
+
+    private void Error(string message, Node node)
     {
     }
 

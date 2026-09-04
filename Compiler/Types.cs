@@ -1,5 +1,6 @@
 namespace Compiler;
 
+// NOTE: Interning is used for types like FuncType. TypeRegistry provides that. Compare by reference
 public abstract class Type
 {
     public abstract string Name { get; }
@@ -10,7 +11,7 @@ public abstract class Type
     }
 }
 
-public class BuiltinType : Type
+public sealed class BuiltinType : Type
 {
     public override string Name { get; }
 
