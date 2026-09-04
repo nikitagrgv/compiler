@@ -2,7 +2,7 @@ namespace Compiler;
 
 public class Scope
 {
-    private Dictionary<string, Symbol> _symbols = new();
+    private readonly Dictionary<string, Symbol> _symbols = new();
 
     public Scope? Parent { get; init; }
 

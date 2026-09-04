@@ -28,8 +28,19 @@ public class BuiltinType : Type
 // TODO: Force creation from registry. Private constructor?
 public sealed class FuncType : Type
 {
-    public required IReadOnlyList<Type> ParamTypes { get; init; }
-    public required Type ReturnType { get; init; }
+    public IReadOnlyList<Type> ParamTypes { get; }
+    public Type ReturnType { get; }
 
     public override string Name => $"({string.Join(", ", ParamTypes.Select(t => t.Name))}): {ReturnType.Name}";
+
+    private FuncType(Type returnType, IReadOnlyList<Type> paramTypes)
+    {
+        ParamTypes = paramTypes;
+        ReturnType = returnType;
+    }
+
+    internal static FuncType CreateInterned(Type returnType, IReadOnlyList<Type> paramTypes)
+    {
+        return new FuncType(returnType, paramTypes);
+    }
 }

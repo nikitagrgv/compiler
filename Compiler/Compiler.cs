@@ -82,8 +82,8 @@ public class Compiler
             return false;
         }
 
-        Sema sema = new();
-        bool semaResult = sema.Run(parserResult.CompilationUnit, _code, _tokens, _diag);
+        Sema sema = new(_code, _tokens, _diag);
+        sema.Run(parserResult.CompilationUnit);
 
         // Print after sema to include sema info
         if (_flags.DebugParser)
@@ -100,7 +100,7 @@ public class Compiler
             Console.WriteLine("================================");
         }
 
-        if (!semaResult)
+        if (_diag.HasErrors)
         {
             _diag.Report();
             return false;
@@ -250,26 +250,26 @@ public class Compiler
                 break;
 
             case ExprBinary n:
-                Console.WriteLine($"{fullPrefix}BinaryExpr: {PrettyExpr(n)} | Type = {n.Type}");
+                Console.WriteLine($"{fullPrefix}BinaryExpr: {PrettyExpr(n)} | Type = {n.ResolvedType}");
                 PrintAstToken(depth + 1, n.OperatorToken, "Operator");
                 PrintAst(depth + 1, n.Left, "Left");
                 PrintAst(depth + 1, n.Right, "Right");
                 break;
             case ExprUnary n:
-                Console.WriteLine($"{fullPrefix}UnaryExpr: {PrettyExpr(n)} | Type = {n.Type}");
+                Console.WriteLine($"{fullPrefix}UnaryExpr: {PrettyExpr(n)} | Type = {n.ResolvedType}");
                 PrintAstToken(depth + 1, n.OperatorToken, "Operator");
                 PrintAst(depth + 1, n.Expr);
                 break;
             case ExprCall n:
-                Console.WriteLine($"{fullPrefix}Call: {PrettyExpr(n)} | Type = {n.Type}");
+                Console.WriteLine($"{fullPrefix}Call: {PrettyExpr(n)} | Type = {n.ResolvedType}");
                 PrintAst(depth + 1, n.Callee);
                 n.Args.ForEach(arg => PrintAst(depth + 1, arg));
                 break;
             case ExprInt n:
-                Console.WriteLine($"{fullPrefix}ExprInt: {TokenValue(n.LiteralToken)} | Type = {n.Type}");
+                Console.WriteLine($"{fullPrefix}ExprInt: {TokenValue(n.LiteralToken)} | Type = {n.ResolvedType}");
                 break;
             case ExprIdentifier n:
-                Console.WriteLine($"{fullPrefix}ExprIdentifier: {TokenValue(n.IdentifierToken)} | Type = {n.Type}");
+                Console.WriteLine($"{fullPrefix}ExprIdentifier: {TokenValue(n.IdentifierToken)} | Type = {n.ResolvedType}");
                 break;
             default: throw new Exception("Unknown node type: " + node.GetType().Name);
         }

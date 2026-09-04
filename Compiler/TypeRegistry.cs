@@ -3,10 +3,16 @@ namespace Compiler;
 // Helper class for interning types like FuncType
 public class TypeRegistry
 {
-    private struct FuncSignature : IEquatable<FuncSignature>
+    private readonly struct FuncSignature : IEquatable<FuncSignature>
     {
-        public Type ReturnType;
-        public IReadOnlyList<Type> ParamTypes;
+        public FuncSignature(Type returnType, IReadOnlyList<Type> paramTypes)
+        {
+            ReturnType = returnType;
+            ParamTypes = paramTypes;
+        }
+
+        public readonly Type ReturnType;
+        public readonly IReadOnlyList<Type> ParamTypes;
 
         public bool Equals(FuncSignature other)
         {
@@ -30,30 +36,18 @@ public class TypeRegistry
 
     private readonly Dictionary<FuncSignature, FuncType> _funcTypes = new();
 
-    public FuncType GetFuncType(Type returnType, List<Type> paramTypes)
+    public FuncType GetFuncType(Type returnType, IReadOnlyList<Type> paramTypes)
     {
-        FuncSignature lookupSignature = new()
-        {
-            ReturnType = returnType,
-            ParamTypes = paramTypes, // don't copy the list
-        };
-
+        FuncSignature lookupSignature = new(returnType, paramTypes);
         if (_funcTypes.TryGetValue(lookupSignature, out FuncType? type))
         {
             return type;
         }
 
-        FuncSignature signature = new()
-        {
-            ReturnType = returnType,
-            ParamTypes = [.. paramTypes], // copy the list, ensure immutability
-        };
+        // copy the list, ensure immutability
+        FuncSignature signature = new(returnType, [.. paramTypes]);
 
-        type = new FuncType
-        {
-            ReturnType = signature.ReturnType,
-            ParamTypes = signature.ParamTypes,
-        };
+        type = FuncType.CreateInterned(signature.ReturnType, signature.ParamTypes);
         _funcTypes.Add(signature, type);
         return type;
     }
