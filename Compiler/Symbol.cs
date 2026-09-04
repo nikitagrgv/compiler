@@ -5,7 +5,7 @@ public abstract class Symbol
 {
     public required string Name { get; init; }
     public required Scope DeclaringScope { get; init; }
-    public required Type Type;
+    public required Type Type { get; init; }
 }
 
 public sealed class VariableSymbol : Symbol
@@ -18,7 +18,13 @@ public sealed class ParamSymbol : Symbol
     public required Param Declaration { get; init; }
 }
 
-public sealed class FunctionSymbol : Symbol
+public sealed class FuncSymbol : Symbol
 {
     public required FuncDecl Declaration { get; init; }
+}
+
+public sealed class TypeSymbol : Symbol
+{
+    // Will be added with user types, e.g., structs
+    // public required Node? Declaration { get; init; }
 }
