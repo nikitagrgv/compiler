@@ -387,7 +387,7 @@ public class Parser
             StartToken = begin,
             EndToken = end,
             NameToken = nameToken,
-            Type = typeDecl,
+            TypeDecl = typeDecl,
             Expr = expr
         };
     }

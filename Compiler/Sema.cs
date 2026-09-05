@@ -108,13 +108,29 @@ public class Sema
 
     private void VisitStmtExpr(StmtExpr stmt)
     {
+        VisitExpr(stmt.Expr);
     }
 
     private void VisitStmtLet(StmtLet stmt)
     {
+        Debug.Assert(stmt.Expr != null || stmt.TypeDecl != null, "Must be guaranteed by parser");
+
+        if (stmt.Expr != null)
+        {
+            VisitExpr(stmt.Expr);
+        }
+
+        if (stmt.TypeDecl != null)
+        {
+            Type declaredType = ResolveType(stmt.TypeDecl);
+        }
     }
 
     private void VisitStmtReturn(StmtReturn stmt)
+    {
+    }
+
+    private void VisitExpr(Expr expr)
     {
     }
 
@@ -149,16 +165,16 @@ public class Sema
         Type returnType = BuiltinType.Void;
         if (fd.ReturnType != null)
         {
-            ResolveType(fd.ReturnType);
-            returnType = fd.ReturnType.ResolvedType!;
+            Type type = ResolveType(fd.ReturnType);
+            returnType = type;
         }
 
         // TODO: Reuse list
         List<Type> paramTypes = [];
         foreach (Param param in fd.Params)
         {
-            ResolveType(param.Type);
-            paramTypes.Add(param.Type.ResolvedType!);
+            Type type = ResolveType(param.Type);
+            paramTypes.Add(type);
         }
 
         Scope scope = CurrentScope();
@@ -215,7 +231,7 @@ public class Sema
         Debug.Assert(ok);
     }
 
-    private void ResolveType(TypeDecl typeDecl)
+    private Type ResolveType(TypeDecl typeDecl)
     {
         Debug.Assert(typeDecl.ResolvedType == null);
 
@@ -225,7 +241,7 @@ public class Sema
         {
             Error($"Type not found: {name}", typeDecl);
             typeDecl.ResolvedType = BuiltinType.Error;
-            return;
+            return typeDecl.ResolvedType;
         }
 
         TypeSymbol? typeSym = sym as TypeSymbol;
@@ -233,10 +249,11 @@ public class Sema
         {
             Error($"Type expected: {name}. Given: {sym.GetType().Name}", typeDecl);
             typeDecl.ResolvedType = BuiltinType.Error;
-            return;
+            return typeDecl.ResolvedType;
         }
 
         typeDecl.ResolvedType = typeSym.Type;
+        return typeDecl.ResolvedType;
     }
 
     private Symbol? LookupLocal(ReadOnlySpan<char> name)

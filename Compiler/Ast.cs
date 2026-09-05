@@ -51,7 +51,7 @@ public class Block : Stmt
 public class StmtLet : Stmt
 {
     public required int NameToken { get; init; }
-    public required TypeDecl? Type { get; init; }
+    public required TypeDecl? TypeDecl { get; init; }
     public required Expr? Expr { get; set; }
 
     public VariableSymbol? Symbol { get; set; }
