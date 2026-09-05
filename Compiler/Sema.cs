@@ -199,6 +199,9 @@ public class Sema
 
     private void VisitExprUnary(ExprUnary exprUnary)
     {
+        VisitExpr(exprUnary.Expr);
+
+        Debug.Assert(exprUnary.Expr);
     }
 
     private void RegisterBuiltin(Scope scope)
@@ -405,12 +408,25 @@ public class Sema
         return null;
     }
 
+    private bool CanUseUnary(Type type, TokenType op)
+    {
+        // TODO: Put this info in type
+
+        if (type == BuiltinType.I32)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private bool CanImplicitlyCast(Type from, Type to)
     {
         Debug.Assert(from != to);
         // TODO: Implement
         return false;
     }
+
 
     private ReadOnlySpan<char> TokenValue(int tokenIndex)
     {
