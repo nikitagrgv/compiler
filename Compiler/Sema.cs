@@ -152,6 +152,13 @@ public class Sema
         Symbol? rec = scope.LookupRecursive(name);
         if (rec != null)
         {
+            if (rec is not VariableSymbol)
+            {
+                // Only variables can be shadowed
+                ErrorRedeclaration(symbol, rec);
+                return;
+            }
+
             WarningShadow(symbol, rec);
         }
 
