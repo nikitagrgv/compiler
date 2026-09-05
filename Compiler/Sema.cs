@@ -48,6 +48,20 @@ public class Sema
         foreach (Param param in fd.Params)
         {
             Debug.Assert(param.Type.ResolvedType != null, $"Must be resolved in {nameof(RegisterFunctionSymbols)}");
+
+            Type type = param.Type.ResolvedType;
+            ReadOnlySpan<char> name = TokenValue(param.NameToken);
+
+            ParamSymbol sym = new()
+            {
+                Declaration = param,
+                DeclaringScope = scope,
+                Type = type,
+                Name = name.ToString()
+            };
+
+            param.Symbol = sym;
+            RegisterSymbol(sym, scope);
         }
 
         fd.Body.Scope = scope;
