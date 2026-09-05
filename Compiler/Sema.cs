@@ -161,11 +161,10 @@ public class Sema
                     return;
                 case ParamSymbol:
                 case VariableSymbol:
+                    WarningShadow(symbol, rec);
                     break;
                 default: throw new Exception("Unknown symbol type: " + rec.GetType().Name);
             }
-
-            WarningShadow(symbol, rec);
         }
 
         bool ok = scope.TryDeclare(symbol);
