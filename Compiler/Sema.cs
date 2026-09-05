@@ -132,6 +132,23 @@ public class Sema
 
     private void VisitExpr(Expr expr)
     {
+        switch (expr)
+        {
+            case ExprBinary exprBinary:
+                break;
+            case ExprCall exprCall:
+                break;
+            case ExprIdentifier exprIdentifier:
+                break;
+            case ExprInt exprInt:
+                break;
+            case ExprPrimary exprPrimary:
+                break;
+            case ExprUnary exprUnary:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(expr));
+        }
     }
 
     private void RegisterBuiltin(Scope scope)
