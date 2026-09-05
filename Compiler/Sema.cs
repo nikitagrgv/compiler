@@ -25,7 +25,7 @@ public class Sema
 
         RegisterBuiltin(scope);
 
-        MakeFunctionSymbols(unit);
+        RegisterFunctionSymbols(unit);
     }
 
     private void RegisterBuiltin(Scope scope)
@@ -46,7 +46,7 @@ public class Sema
         Register("i32", BuiltinType.I32);
     }
 
-    private void MakeFunctionSymbols(CompilationUnit unit)
+    private void RegisterFunctionSymbols(CompilationUnit unit)
     {
         foreach (FuncDecl fd in unit.FuncDecls)
         {
