@@ -368,6 +368,7 @@ public class Sema
 
         if (CanImplicitlyCast(type, targetType))
         {
+            Debug.Assert(expr.ResolvedType != targetType, "Don't need cast");
             ExprCast cast = new ExprImplicitCast
             {
                 StartToken = expr.StartToken,
