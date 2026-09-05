@@ -40,10 +40,15 @@ public class Sema
 
     private void VisitFuncDecl(FuncDecl fd)
     {
+        // NOTE: Function symbol is already registered in RegisterFunctionSymbols. Types of params are resolved.
+
         Scope scope = new(CurrentScope());
         PushScope(scope);
+    }
 
-        // NOTE: Function symbol is already registered in RegisterFunctionSymbols. Types of params are resolved.
+    private void VisitBlock(Block block)
+    {
+        Debug.Assert(block.Scope != null, "Block scope must be set from outside");
     }
 
     private void RegisterBuiltin(Scope scope)
