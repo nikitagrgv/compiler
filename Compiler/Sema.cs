@@ -42,6 +42,7 @@ public class Sema
             Debug.Assert(added);
         }
 
+        // NOTE: Don't register void because it's not supposed to be used by user
         Register("i32", BuiltinType.I32);
     }
 
