@@ -328,6 +328,12 @@ public class Sema
         return _scopes[^1];
     }
 
+    private bool CanImplicitlyCast(Type from, Type to)
+    {
+        Debug.Assert(from != to);
+        return false;
+    }
+
     private ReadOnlySpan<char> TokenValue(int tokenIndex)
     {
         return _tokens[tokenIndex].Value(_code);
