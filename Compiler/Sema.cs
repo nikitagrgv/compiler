@@ -328,6 +328,38 @@ public class Sema
         return _scopes[^1];
     }
 
+    private Expr Adapt(Expr expr, Type targetType)
+    {
+        Debug.Assert(expr.ResolvedType != null, "Must be resolve before adapt");
+
+        Type type = expr.ResolvedType;
+        if (type == BuiltinType.Error || targetType == BuiltinType.Error)
+        {
+            // Already reported
+            return expr;
+        }
+
+        if (type == targetType)
+        {
+            return expr;
+        }
+
+        if (CanImplicitlyCast(type, targetType))
+        {
+            ExprCast cast = new ExprImplicitCast
+            {
+                StartToken = expr.StartToken,
+                EndToken = expr.EndToken,
+                Operand = expr,
+                Target = targetType,
+            };
+            return cast;
+        }
+
+        Error($"Cannot implicitly cast {type} to {targetType}", expr);
+        return expr;
+    }
+
     private bool CanImplicitlyCast(Type from, Type to)
     {
         Debug.Assert(from != to);
