@@ -134,7 +134,7 @@ public class Sema
         Debug.Assert(type != null);
 
         ReadOnlySpan<char> name = TokenValue(stmt.NameToken);
-        Symbol sym = new VariableSymbol
+        VariableSymbol sym = new()
         {
             Declaration = stmt,
             Name = name.ToString(),
@@ -142,6 +142,7 @@ public class Sema
             Type = type
         };
 
+        stmt.Symbol = sym;
         RegisterSymbol(sym);
     }
 
