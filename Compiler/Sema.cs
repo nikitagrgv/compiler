@@ -75,13 +75,15 @@ public class Sema
         ReadOnlySpan<char> name = TokenValue(fd.NameToken);
 
         FuncType funcType = _typeRegistry.GetFuncType(returnType, paramTypes);
-        Symbol sym = new FuncSymbol
+        FuncSymbol sym = new()
         {
             Declaration = fd,
             DeclaringScope = scope,
             Type = funcType,
             Name = name.ToString()
         };
+
+        fd.Symbol = sym;
 
         // NOTE: Create symbol even if it's a redeclaration
 
