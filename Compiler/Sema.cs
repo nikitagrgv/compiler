@@ -42,6 +42,8 @@ public class Sema
     {
         Scope scope = new(CurrentScope());
         PushScope(scope);
+
+        // NOTE: Function symbol is already registered in RegisterFunctionSymbols. Types of params are resolved.
     }
 
     private void RegisterBuiltin(Scope scope)
