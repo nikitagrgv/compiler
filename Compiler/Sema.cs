@@ -6,6 +6,8 @@ public class Sema
     private readonly Diagnostic _diag;
     private readonly IReadOnlyList<Token> _tokens;
     private readonly TypeRegistry _typeRegistry = new();
+    private readonly Scope _globalScope = new();
+    private readonly List<Scope> _scopes = new();
 
     public Sema(string code, IReadOnlyList<Token> tokens, Diagnostic diag)
     {
@@ -16,7 +18,17 @@ public class Sema
 
     public void Run(CompilationUnit unit)
     {
-        
+        _scopes.Add(_globalScope);
+    }
+
+    private void PushScope(Scope scope)
+    {
+        _scopes.Add(scope);
+    }
+
+    private void PopScope()
+    {
+        _scopes.RemoveAt(_scopes.Count - 1);
     }
 
     private void Error(string message, Node node)
