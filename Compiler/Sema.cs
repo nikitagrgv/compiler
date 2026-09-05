@@ -61,7 +61,7 @@ public class Sema
             };
 
             param.Symbol = sym;
-            RegisterSymbol(sym, scope);
+            RegisterSymbol(sym);
         }
 
         fd.Body.Scope = scope;
@@ -132,6 +132,17 @@ public class Sema
         }
 
         Debug.Assert(type != null);
+
+        ReadOnlySpan<char> name = TokenValue(stmt.NameToken);
+        Symbol sym = new VariableSymbol
+        {
+            Declaration = stmt,
+            Name = name.ToString(),
+            DeclaringScope = CurrentScope(),
+            Type = type
+        };
+
+        RegisterSymbol(sym);
     }
 
     private void VisitStmtReturn(StmtReturn stmt)
@@ -248,12 +259,14 @@ public class Sema
 
         // NOTE: Create symbol even if it's a redeclaration
 
-        RegisterSymbol(sym, scope);
+        RegisterSymbol(sym);
     }
 
-    private void RegisterSymbol(Symbol symbol, Scope scope)
+    private void RegisterSymbol(Symbol symbol)
     {
         // TODO: Lookup once
+
+        Scope scope = symbol.DeclaringScope;
 
         string name = symbol.Name;
         Symbol? loc = scope.LookupLocal(name);
