@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Compiler;
 
 public class Sema
@@ -17,16 +19,39 @@ public class Sema
 
     public void Run(CompilationUnit unit)
     {
-        unit.Scope = new Scope();
-        PushScope(unit.Scope);
+        Scope scope = new();
+        unit.Scope = scope;
+        PushScope(scope);
+
+        RegisterBuiltin(scope);
 
         CollectFunctionsSymbols(unit);
     }
 
+    private void RegisterBuiltin(Scope scope)
+    {
+        void Register(string name, Type type)
+        {
+            TypeSymbol symbol = new()
+            {
+                Name = name,
+                DeclaringScope = scope,
+                Type = type,
+            };
+            bool added = scope.TryDeclare(symbol);
+            Debug.Assert(added);
+        }
+
+        Register("i32", BuiltinType.I32);
+    }
+
     private void CollectFunctionsSymbols(CompilationUnit unit)
     {
+        Scope scope = CurrentScope();
         foreach (FuncDecl fd in unit.FuncDecls)
         {
+            ReadOnlySpan<char> name = TokenValue(fd.NameToken);
+            // fd.Params
         }
     }
 
@@ -43,6 +68,11 @@ public class Sema
     private Scope CurrentScope()
     {
         return _scopes[^1];
+    }
+
+    private ReadOnlySpan<char> TokenValue(int tokenIndex)
+    {
+        return _tokens[tokenIndex].Value(_code);
     }
 
     private void Error(string message, Node node)
