@@ -73,7 +73,32 @@ public class Sema
     private void VisitBlock(Block block)
     {
         Debug.Assert(block.Scope != null, "Block scope must be set from outside");
+
+        foreach (Stmt stmt in block.Stmts)
+        {
+            switch (stmt)
+            {
+                case Block b:
+                    Scope scope = new(CurrentScope());
+                    PushScope(scope);
+                    b.Scope = scope;
+                    PopScope();
+                    break;
+                case StmtAssign stmtAssign:
+                    break;
+                case StmtExpr stmtExpr:
+                    break;
+                case StmtLet stmtLet:
+                    break;
+                case StmtReturn stmtReturn:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(stmt));
+            }
+        }
     }
+
+    private void Visit
 
     private void RegisterBuiltin(Scope scope)
     {
