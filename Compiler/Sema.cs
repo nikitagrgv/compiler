@@ -25,7 +25,7 @@ public class Sema
 
         RegisterBuiltin(scope);
 
-        CollectFunctionsSymbols(unit);
+        MakeFunctionSymbols(unit);
     }
 
     private void RegisterBuiltin(Scope scope)
@@ -46,19 +46,72 @@ public class Sema
         Register("i32", BuiltinType.I32);
     }
 
-    private void CollectFunctionsSymbols(CompilationUnit unit)
+    private void MakeFunctionSymbols(CompilationUnit unit)
     {
-        Scope scope = CurrentScope();
         foreach (FuncDecl fd in unit.FuncDecls)
         {
-            ReadOnlySpan<char> name = TokenValue(fd.NameToken);
-
-            // fd.Params
+            AddFunctionSymbol(fd);
         }
+    }
+
+    private void AddFunctionSymbol(FuncDecl fd)
+    {
+        Type returnType = BuiltinType.Void;
+        if (fd.ReturnType != null)
+        {
+            ResolveType(fd.ReturnType);
+            returnType = fd.ReturnType.ResolvedType!;
+        }
+
+        // TODO: Reuse list
+        List<Type> paramTypes = [];
+        foreach (Param param in fd.Params)
+        {
+            ResolveType(param.Type);
+            paramTypes.Add(param.Type.ResolvedType!);
+        }
+
+        Scope scope = CurrentScope();
+        ReadOnlySpan<char> name = TokenValue(fd.NameToken);
+
+        FuncType funcType = _typeRegistry.GetFuncType(returnType, paramTypes);
+        Symbol sym = new FuncSymbol
+        {
+            Declaration = fd,
+            DeclaringScope = scope,
+            Type = funcType,
+            Name = name.ToString()
+        };
+
+        RegisterSymbol(sym, scope);
+    }
+
+    private void RegisterSymbol(Symbol symbol, Scope scope)
+    {
+        // TODO: Lookup once
+
+        string name = symbol.Name;
+        Symbol? loc = scope.LookupLocal(name);
+        if (loc != null)
+        {
+            ErrorRedeclaration(symbol, loc);
+            return;
+        }
+
+        Symbol? rec = scope.LookupRecursive(name);
+        if (rec != null)
+        {
+            WarningShadow(symbol, rec);
+        }
+
+        bool ok = scope.TryDeclare(symbol);
+        Debug.Assert(ok);
     }
 
     private void ResolveType(TypeDecl typeDecl)
     {
+        Debug.Assert(typeDecl.ResolvedType == null);
+
         ReadOnlySpan<char> name = TokenValue(typeDecl.TypeNameToken);
         Symbol? sym = LookupRecursive(name);
         if (sym == null)
@@ -110,6 +163,14 @@ public class Sema
     }
 
     private void Error(string message, Node node)
+    {
+    }
+
+    private void ErrorRedeclaration(Symbol newSymbol, Symbol oldSymbol)
+    {
+    }
+
+    private void WarningShadow(Symbol newSymbol, Symbol oldSymbol)
     {
     }
 }
