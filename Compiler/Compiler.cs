@@ -187,16 +187,18 @@ public class Compiler
                 n.Stmts.ForEach(stmt => PrintAst(depth + 1, stmt));
                 break;
             case Param n:
-                Console.WriteLine($"{fullPrefix}Param");
+                Console.WriteLine($"{fullPrefix}Param | Type {n.Type}");
+                PrintSymbol(depth + 1, n.Symbol);
                 PrintAstToken(depth + 1, n.NameToken, "Name");
                 PrintAst(depth + 1, n.Type);
                 break;
             case TypeDecl n:
-                Console.WriteLine($"{fullPrefix}TypeDecl");
+                Console.WriteLine($"{fullPrefix}TypeDecl | Type {n.ResolvedType}");
                 PrintAstToken(depth + 1, n.TypeNameToken, "Type");
                 break;
             case FuncDecl n:
                 Console.WriteLine($"{fullPrefix}FuncDecl");
+                PrintSymbol(depth + 1, n.Symbol);
                 PrintAstToken(depth + 1, n.NameToken, "Name");
                 n.Params.ForEach(p => PrintAst(depth + 1, p));
                 if (n.ReturnType != null)
@@ -207,7 +209,8 @@ public class Compiler
                 PrintAst(depth + 1, n.Body);
                 break;
             case StmtLet n:
-                Console.WriteLine($"{fullPrefix}StmtLet");
+                Console.WriteLine($"{fullPrefix}StmtLet | Type {n.Type}");
+                PrintSymbol(depth + 1, n.Symbol);
                 PrintAstToken(depth + 1, n.NameToken, "Name");
                 if (n.Type != null)
                 {
@@ -323,5 +326,11 @@ public class Compiler
     {
         string indent = MakeIndent(depth);
         Console.WriteLine($"{indent}{name}: \"{_tokens[token].Value(_code)}\"");
+    }
+
+    private void PrintSymbol(int depth, Symbol? symbol)
+    {
+        string indent = MakeIndent(depth);
+        Console.WriteLine($"{indent}Symbol: {symbol}");
     }
 }

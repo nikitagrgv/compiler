@@ -6,6 +6,12 @@ public abstract class Symbol
     public required string Name { get; init; }
     public required Scope DeclaringScope { get; init; }
     public required Type Type { get; init; }
+
+    public override string ToString()
+    {
+        string type = GetType().Name;
+        return $"{Name}({type})";
+    }
 }
 
 public sealed class VariableSymbol : Symbol
