@@ -83,6 +83,8 @@ public class Sema
             Name = name.ToString()
         };
 
+        // NOTE: Create symbol even if it's redeclaration
+
         RegisterSymbol(sym, scope);
     }
 
