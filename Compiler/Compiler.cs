@@ -96,7 +96,7 @@ public class Compiler
         if (_flags.DebugSema)
         {
             Console.WriteLine("================================");
-            sema.PrintDebug();
+            // PrintSema(parserResult.CompilationUnit);
             Console.WriteLine("================================");
         }
 
@@ -263,7 +263,8 @@ public class Compiler
                 Console.WriteLine($"{fullPrefix}ExprInt: {TokenValue(n.LiteralToken)} | Type = {n.ResolvedType}");
                 break;
             case ExprIdentifier n:
-                Console.WriteLine($"{fullPrefix}ExprIdentifier: {TokenValue(n.IdentifierToken)} | Type = {n.ResolvedType}");
+                Console.WriteLine(
+                    $"{fullPrefix}ExprIdentifier: {TokenValue(n.IdentifierToken)} | Type = {n.ResolvedType}");
                 break;
             default: throw new Exception("Unknown node type: " + node.GetType().Name);
         }

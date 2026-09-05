@@ -16,13 +16,10 @@ public class Sema
 
     public void Run(CompilationUnit unit)
     {
+        
     }
 
     private void Error(string message, Node node)
-    {
-    }
-
-    public void PrintDebug()
     {
     }
 }
