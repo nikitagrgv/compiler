@@ -389,6 +389,8 @@ public class Sema
             return a;
         }
 
+        // TODO: Consider op too
+
         if (CanImplicitlyCast(b, a))
         {
             return a;
