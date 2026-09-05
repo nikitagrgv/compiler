@@ -235,9 +235,21 @@ public class Sema
         _diag.AddError(message, _tokens[newSymbolToken]);
     }
 
+    // TODO: Duplicated
     private void WarningShadow(Symbol newSymbol, Symbol oldSymbol)
     {
         Debug.Assert(newSymbol.Name == oldSymbol.Name);
         Debug.Assert(newSymbol.DeclaringNode != null);
+
+        string message = $"Shadowing of {newSymbol.Name}";
+        if (oldSymbol.DeclaringNode != null)
+        {
+            int oldSymbolToken = oldSymbol.DeclaringNode.StartToken;
+            Token old = _tokens[oldSymbolToken];
+            message += $". Previously declared at {old.Line}:{old.Column}";
+        }
+
+        int newSymbolToken = newSymbol.DeclaringNode.StartToken;
+        _diag.AddWarning(message, _tokens[newSymbolToken]);
     }
 }
