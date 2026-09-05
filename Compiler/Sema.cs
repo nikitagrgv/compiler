@@ -152,11 +152,17 @@ public class Sema
         Symbol? rec = scope.LookupRecursive(name);
         if (rec != null)
         {
-            if (rec is not VariableSymbol)
+            switch (rec)
             {
-                // Only variables can be shadowed
-                ErrorRedeclaration(symbol, rec);
-                return;
+                case FuncSymbol:
+                case TypeSymbol:
+                    // Only variables/params can be shadowed
+                    ErrorRedeclaration(symbol, rec);
+                    return;
+                case ParamSymbol:
+                case VariableSymbol:
+                    break;
+                default: throw new Exception("Unknown symbol type: " + rec.GetType().Name);
             }
 
             WarningShadow(symbol, rec);
