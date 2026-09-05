@@ -215,6 +215,7 @@ public class Sema
 
     private void Error(string message, Node node)
     {
+        _diag.AddError();
     }
 
     private void ErrorRedeclaration(Symbol newSymbol, Symbol oldSymbol)
