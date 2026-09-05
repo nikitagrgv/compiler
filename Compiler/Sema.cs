@@ -115,15 +115,23 @@ public class Sema
     {
         Debug.Assert(stmt.Expr != null || stmt.TypeDecl != null, "Must be guaranteed by parser");
 
+        Type? type = null;
         if (stmt.Expr != null)
         {
             VisitExpr(stmt.Expr);
+            type = stmt.Expr.ResolvedType;
         }
 
         if (stmt.TypeDecl != null)
         {
-            Type declaredType = ResolveType(stmt.TypeDecl);
+            type = ResolveType(stmt.TypeDecl);
+            if (stmt.Expr != null)
+            {
+                stmt.Expr = Adapt(stmt.Expr, type);
+            }
         }
+
+        Debug.Assert(type != null);
     }
 
     private void VisitStmtReturn(StmtReturn stmt)
