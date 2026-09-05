@@ -10,7 +10,7 @@ public abstract class Symbol
     public override string ToString()
     {
         string type = GetType().Name;
-        return $"{Name}({type})";
+        return $"\"{Name}\"({type})";
     }
 }
 
