@@ -3,15 +3,27 @@ namespace Compiler;
 public class Scope
 {
     private readonly Dictionary<string, Symbol> _symbols = new();
+    private readonly Dictionary<string, Symbol>.AlternateLookup<ReadOnlySpan<char>> _lookup;
 
     public Scope? Parent { get; init; }
 
-    public Symbol? LookupLocal(string name)
+    public Scope()
     {
-        return _symbols.GetValueOrDefault(name);
+        _lookup = _symbols.GetAlternateLookup<ReadOnlySpan<char>>();
     }
 
-    public Symbol? LookupRecursive(string name)
+    public Symbol? LookupLocal(ReadOnlySpan<char> name)
+    {
+        _lookup.TryGetValue(name, out Symbol? symbol);
+        if (symbol != null)
+        {
+            return symbol;
+        }
+
+        return null;
+    }
+
+    public Symbol? LookupRecursive(ReadOnlySpan<char> name)
     {
         Scope? cur = this;
         while (cur != null)

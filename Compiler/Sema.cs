@@ -8,7 +8,7 @@ public class Sema
     private readonly Diagnostic _diag;
     private readonly IReadOnlyList<Token> _tokens;
     private readonly TypeRegistry _typeRegistry = new();
-    private readonly List<Scope> _scopes = new();
+    private readonly List<Scope> _scopes = new(); // TODO: Do we need list? Or just current scope?
 
     public Sema(string code, IReadOnlyList<Token> tokens, Diagnostic diag)
     {
@@ -52,8 +52,41 @@ public class Sema
         foreach (FuncDecl fd in unit.FuncDecls)
         {
             ReadOnlySpan<char> name = TokenValue(fd.NameToken);
+
             // fd.Params
         }
+    }
+
+    private void ResolveType(TypeDecl typeDecl)
+    {
+        ReadOnlySpan<char> name = TokenValue(typeDecl.TypeNameToken);
+        Symbol? sym = LookupRecursive(name);
+        if (sym == null)
+        {
+            Error($"Type not found: {name}", typeDecl);
+            typeDecl.ResolvedType = BuiltinType.Error;
+            return;
+        }
+
+        TypeSymbol? typeSym = sym as TypeSymbol;
+        if (typeSym == null)
+        {
+            Error($"Type expected: {name}. Given: {sym.GetType().Name}", typeDecl);
+            typeDecl.ResolvedType = BuiltinType.Error;
+            return;
+        }
+
+        typeDecl.ResolvedType = typeSym.Type;
+    }
+
+    private Symbol? LookupLocal(ReadOnlySpan<char> name)
+    {
+        return CurrentScope().LookupLocal(name);
+    }
+
+    private Symbol? LookupRecursive(ReadOnlySpan<char> name)
+    {
+        return CurrentScope().LookupRecursive(name);
     }
 
     private void PushScope(Scope scope)
