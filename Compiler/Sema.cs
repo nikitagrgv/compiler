@@ -19,13 +19,29 @@ public class Sema
 
     public void Run(CompilationUnit unit)
     {
-        Scope scope = new();
+        Scope scope = new(null);
         unit.Scope = scope;
         PushScope(scope);
 
         RegisterBuiltin(scope);
 
         RegisterFunctionSymbols(unit);
+
+        VisitCompilationUnit(unit);
+    }
+
+    private void VisitCompilationUnit(CompilationUnit unit)
+    {
+        foreach (FuncDecl fd in unit.FuncDecls)
+        {
+            VisitFuncDecl(fd);
+        }
+    }
+
+    private void VisitFuncDecl(FuncDecl fd)
+    {
+        Scope scope = new(CurrentScope());
+        PushScope(scope);
     }
 
     private void RegisterBuiltin(Scope scope)

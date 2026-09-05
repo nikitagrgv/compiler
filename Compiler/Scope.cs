@@ -7,8 +7,9 @@ public class Scope
 
     public Scope? Parent { get; init; }
 
-    public Scope()
+    public Scope(Scope? parent)
     {
+        Parent = parent;
         _lookup = _symbols.GetAlternateLookup<ReadOnlySpan<char>>();
     }
 
