@@ -40,10 +40,20 @@ public class Sema
 
     private void VisitFuncDecl(FuncDecl fd)
     {
-        // NOTE: Function symbol is already registered in RegisterFunctionSymbols. Types of params are resolved.
+        Debug.Assert(fd.Symbol != null, $"Must be registered in {nameof(RegisterFunctionSymbols)}");
 
         Scope scope = new(CurrentScope());
         PushScope(scope);
+
+        foreach (Param param in fd.Params)
+        {
+            Debug.Assert(param.Type.ResolvedType != null, $"Must be resolved in {nameof(RegisterFunctionSymbols)}");
+        }
+
+        fd.Body.Scope = scope;
+        VisitBlock(fd.Body);
+
+        PopScope();
     }
 
     private void VisitBlock(Block block)
