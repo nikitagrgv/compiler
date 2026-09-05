@@ -382,6 +382,26 @@ public class Sema
         return expr;
     }
 
+    private Type? GetCommonType(Type a, Type b, TokenType op)
+    {
+        if (a == b)
+        {
+            return a;
+        }
+
+        if (CanImplicitlyCast(b, a))
+        {
+            return a;
+        }
+
+        if (CanImplicitlyCast(a, b))
+        {
+            return b;
+        }
+
+        return null;
+    }
+
     private bool CanImplicitlyCast(Type from, Type to)
     {
         Debug.Assert(from != to);
