@@ -135,20 +135,50 @@ public class Sema
         switch (expr)
         {
             case ExprBinary exprBinary:
+                VisitExprBinary(exprBinary);
                 break;
             case ExprCall exprCall:
+                VisitExprCall(exprCall);
                 break;
             case ExprIdentifier exprIdentifier:
+                VisitExprIdentifier(exprIdentifier);
                 break;
             case ExprInt exprInt:
+                VisitExprInt(exprInt);
                 break;
             case ExprPrimary exprPrimary:
+                VisitExprPrimary(exprPrimary);
                 break;
             case ExprUnary exprUnary:
+                VisitExprUnary(exprUnary);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(expr));
         }
+    }
+
+    private void VisitExprBinary(ExprBinary exprBinary)
+    {
+    }
+
+    private void VisitExprCall(ExprCall exprCall)
+    {
+    }
+
+    private void VisitExprIdentifier(ExprIdentifier exprIdentifier)
+    {
+    }
+
+    private void VisitExprInt(ExprInt exprInt)
+    {
+    }
+
+    private void VisitExprPrimary(ExprPrimary exprPrimary)
+    {
+    }
+
+    private void VisitExprUnary(ExprUnary exprUnary)
+    {
     }
 
     private void RegisterBuiltin(Scope scope)
