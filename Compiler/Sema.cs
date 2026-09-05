@@ -85,12 +85,16 @@ public class Sema
                     PopScope();
                     break;
                 case StmtAssign stmtAssign:
+                    VisitStmtAssign(stmtAssign);
                     break;
                 case StmtExpr stmtExpr:
+                    VisitStmtExpr(stmtExpr);
                     break;
                 case StmtLet stmtLet:
+                    VisitStmtLet(stmtLet);
                     break;
                 case StmtReturn stmtReturn:
+                    VisitStmtReturn(stmtReturn);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(stmt));
@@ -98,7 +102,21 @@ public class Sema
         }
     }
 
-    private void Visit
+    private void VisitStmtAssign(StmtAssign stmt)
+    {
+    }
+
+    private void VisitStmtExpr(StmtExpr stmt)
+    {
+    }
+
+    private void VisitStmtLet(StmtLet stmt)
+    {
+    }
+
+    private void VisitStmtReturn(StmtReturn stmt)
+    {
+    }
 
     private void RegisterBuiltin(Scope scope)
     {
