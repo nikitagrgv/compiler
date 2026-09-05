@@ -154,15 +154,16 @@ public class Sema
         {
             switch (rec)
             {
+                case ParamSymbol:
+                case VariableSymbol:
+                    WarningShadow(symbol, rec);
+                    break;
                 case FuncSymbol:
                 case TypeSymbol:
                     // Only variables/params can be shadowed
                     ErrorRedeclaration(symbol, rec);
                     return;
-                case ParamSymbol:
-                case VariableSymbol:
-                    WarningShadow(symbol, rec);
-                    break;
+
                 default: throw new Exception("Unknown symbol type: " + rec.GetType().Name);
             }
         }
